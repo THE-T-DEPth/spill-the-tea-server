@@ -15,14 +15,20 @@ import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 public class AuthServiceImpl implements AuthService {
 
     private MemberRepository memberRepository;
-
     private final PasswordEncoder passwordEncoder;
 
+    @Override
     @Transactional
     public ResponseEntity<?> join(JoinReq joinReq) {
+        // 이메일 중복 체크
+        if (memberRepository.existsByEmail(joinReq.getEmail())) {
+            return ResponseEntity.badRequest().body("이미 사용중인 이메일입니다.");
+        }
+
+        // 비밀번호 암호화 후 저장
         Member member = Member.builder()
                 .email(joinReq.getEmail())
-                .password(joinReq.getPassword())
+                .password(passwordEncoder.encode(joinReq.getPassword()))
                 .name(joinReq.getName())
                 .nickname(joinReq.getNickname())
                 .build();
