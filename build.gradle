@@ -28,18 +28,29 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
 	// DB
 	runtimeOnly 'com.h2database:h2'
 	runtimeOnly 'com.mysql:mysql-connector-j'
+
+	// JWT
+//	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+//	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+//	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+	implementation 'com.auth0:java-jwt:3.13.0'
+
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 //    testImplementation 'org.springframework.security:spring-security-test'
+
 	// chatgpt
 	implementation 'io.github.flashvayne:chatgpt-spring-boot-starter:1.0.4'
 }
