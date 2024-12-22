@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import the_t.mainproject.domain.auth.application.AuthServiceImpl;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
+import the_t.mainproject.domain.auth.dto.request.LoginReq;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,5 +18,10 @@ public class AuthController {
     @PostMapping("/join")
     public ResponseEntity<?> join(@Valid @RequestBody JoinReq joinReq) {
         return authServiceImpl.join(joinReq);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginReq loginReq) {
+        return authServiceImpl.login(loginReq);
     }
 }
