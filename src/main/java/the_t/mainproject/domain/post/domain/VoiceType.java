@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 public enum VoiceType {
 
-    // 임시 지정. 기획팀과 상의 후 변경
-    TYPE1("TYPE1", "첫번째 타입");
+    MALE("MALE", "성인 남성"),
+    FEMALE("FEMALE", "성인 여성");
 
     String key;
     String value;

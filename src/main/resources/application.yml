@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ["db", "chatgpt"]
+    active: ["db", "chatgpt", "jwt"]
 logging:
   level:
     com.zaxxer.hikari.HikariConfig: DEBUG

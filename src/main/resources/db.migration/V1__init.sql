@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS member (
     password        VARCHAR(255)            NOT NULL,
     name            VARCHAR(255)            NOT NULL,
     nickname        VARCHAR(255)            NOT NULL,
+    profile_image   VARCHAR(255)            NULL,
     created_date    DATETIME                NOT NULL,
     modified_date   DATETIME                NOT NULL,
     CONSTRAINT pk_member PRIMARY KEY (id)
@@ -19,7 +20,7 @@ CREATE TABLE IF NOT EXISTS post (
     reported_count  INT                         DEFAULT 0 CHECK (reported_count >=0)
     created_date    DATETIME                    NOT NULL,
     modified_date   DATETIME                    NOT NULL,
-    voice_type      ENUM ('TYPE1')              NULL,
+    voice_type      ENUM ('MALE', 'FEMALE')              NULL,
     CONSTRAINT pk_post PRIMARY KEY (id)
 ) ENGINE=InnoDB;
 
