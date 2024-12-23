@@ -3,6 +3,7 @@ package the_t.mainproject.domain.comment.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
+import the_t.mainproject.domain.common.BaseEntity;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.post.domain.Post;
 
@@ -10,7 +11,7 @@ import the_t.mainproject.domain.post.domain.Post;
 @Getter
 @Entity
 @Table(name = "comment")
-public class Comment {
+public class Comment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

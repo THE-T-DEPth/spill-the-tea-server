@@ -9,7 +9,9 @@ import the_t.mainproject.domain.post.domain.Post;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "liked")
+@Table(name = "liked", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"member_id", "post_id"})
+})
 public class Liked extends BaseEntity {
 
     @Id
