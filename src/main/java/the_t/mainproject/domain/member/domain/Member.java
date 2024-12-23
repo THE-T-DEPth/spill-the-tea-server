@@ -4,10 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import the_t.mainproject.domain.common.BaseEntity;
 
-@Entity
-@Table(name = "Member")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
+@Table(name = "member")
 public class Member extends BaseEntity {
 
     @Id
