@@ -109,6 +109,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
     }
 
+    // [Exception] 데이터 무결성을 위반한 경우
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        log.error("handleDataIntegrityViolationException", ex);
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.CONFLICT, ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
     // Input / Output 내에서 발생한 경우
     @ExceptionHandler(IOException.class)
     protected ResponseEntity<ErrorResponse> handleIOException(IOException ex) {
