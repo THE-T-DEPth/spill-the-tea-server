@@ -1,12 +1,14 @@
 package the_t.mainproject.domain.auth.application;
 
-import org.springframework.http.ResponseEntity;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
+import the_t.mainproject.domain.auth.dto.response.LoginRes;
+import the_t.mainproject.global.common.Message;
+import the_t.mainproject.global.common.SuccessResponse;
 
 public interface AuthService {
 
-    ResponseEntity<?> join(JoinReq joinReq);
+    SuccessResponse<Message> join(JoinReq joinReq);
 
-    ResponseEntity<?> login(LoginReq loginReq);
+    SuccessResponse<LoginRes> login(LoginReq loginReq);
 }
