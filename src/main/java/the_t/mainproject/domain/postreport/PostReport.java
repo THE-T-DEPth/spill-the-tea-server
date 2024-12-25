@@ -1,7 +1,10 @@
-package the_t.mainproject.domain.liked.domain;
+package the_t.mainproject.domain.postreport;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import the_t.mainproject.domain.common.BaseEntity;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.post.domain.Post;
@@ -9,10 +12,10 @@ import the_t.mainproject.domain.post.domain.Post;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "liked", uniqueConstraints = {
+@Table(name = "post_report", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"member_id", "post_id"})
 })
-public class Liked extends BaseEntity {
+public class PostReport extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +30,7 @@ public class Liked extends BaseEntity {
     private Post post;
 
     @Builder
-    public Liked(Member member, Post post) {
+    public PostReport(Member member, Post post) {
         this.member = member;
         this.post = post;
     }

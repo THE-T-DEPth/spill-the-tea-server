@@ -6,10 +6,10 @@ import lombok.*;
 import the_t.mainproject.domain.common.BaseEntity;
 import the_t.mainproject.domain.member.domain.Member;
 
-@Entity
-@Table(name = "Post")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
+@Table(name = "post")
 public class Post extends BaseEntity {
 
     @Id
@@ -42,7 +42,7 @@ public class Post extends BaseEntity {
     private Integer reportedCount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "voice_type", nullable = false)
+    @Column(name = "voice_type")
     private VoiceType voiceType;
 
     @Builder

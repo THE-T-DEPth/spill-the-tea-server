@@ -5,10 +5,12 @@ import lombok.*;
 import the_t.mainproject.domain.common.BaseEntity;
 import the_t.mainproject.domain.member.domain.Member;
 
-@Entity
-@Table(name = "Block")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
+@Table(name = "block", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"blocker_id", "blocked_id"})
+})
 public class Block extends BaseEntity {
 
     @Id
@@ -21,11 +23,11 @@ public class Block extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocked_id", nullable = false)
-    private Member member;
+    private Member blocked;
 
     @Builder
-    public Block(Member blocker, Member member) {
+    public Block(Member blocker, Member blocked) {
         this.blocker = blocker;
-        this.member = member;
+        this.blocked = blocked;
     }
 }

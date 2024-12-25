@@ -6,10 +6,10 @@ import the_t.mainproject.domain.common.BaseEntity;
 import the_t.mainproject.domain.keyword.domain.Keyword;
 import the_t.mainproject.domain.post.domain.Post;
 
-@Entity
-@Table(name = "PostKeyword")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@Entity
+@Table(name = "post_keyword")
 public class PostKeyword extends BaseEntity {
 
     @Id
@@ -21,7 +21,7 @@ public class PostKeyword extends BaseEntity {
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "keword_id", nullable = false)
+    @JoinColumn(name = "keyword_id", nullable = false)
     private Keyword keyword;
 
     @Builder

@@ -3,16 +3,15 @@ package the_t.mainproject.domain.comment.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
+import the_t.mainproject.domain.common.BaseEntity;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.post.domain.Post;
 
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "Comment")
-@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Comment {
+@Getter
+@Entity
+@Table(name = "comment")
+public class Comment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,21 +40,21 @@ public class Comment {
     @Min(value = 0)
     private Integer reportedCount;
 
-    @Builder(builderMethodName = "memberCommentBuilder", builderClassName = "memberCommentBuilder")
-    public Comment(Post post, Member member, String content, Integer likedCount, Integer reportedCount) {
+    @Builder(builderMethodName = "CommentBuilder", builderClassName = "CommentBuilder")
+    public Comment(Post post, Member member, String content) {
         this.post = post;
         this.member = member;
         this.content = content;
-        this.likedCount = likedCount;
-        this.reportedCount = reportedCount;
+        this.likedCount = 0;
+        this.reportedCount = 0;
     }
 
-    @Builder(builderMethodName = "memberReplyBuilder", builderClassName = "memberRelpyBuilder")
-    public Comment(Comment parentComment, Member member, String content, Integer likedCount, Integer reportedCount) {
+    @Builder(builderMethodName = "ReplyBuilder", builderClassName = "ReplyBuilder")
+    public Comment(Comment parentComment, Member member, String content) {
         this.parentComment = parentComment;
         this.member = member;
         this.content = content;
-        this.likedCount = likedCount;
-        this.reportedCount = reportedCount;
+        this.likedCount = 0;
+        this.reportedCount = 0;
     }
 }

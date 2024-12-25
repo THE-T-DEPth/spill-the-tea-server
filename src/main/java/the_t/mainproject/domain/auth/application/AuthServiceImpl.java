@@ -17,6 +17,8 @@ import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.global.common.Message;
+import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.jwt.JwtTokenProvider;
 
 @RequiredArgsConstructor
@@ -32,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> join(JoinReq joinReq) {
+    public SuccessResponse<Message> join(JoinReq joinReq) {
         Member member = Member.builder()
                 .email(joinReq.getEmail())
                 .name(joinReq.getName())
@@ -42,12 +44,16 @@ public class AuthServiceImpl implements AuthService {
 
         memberRepository.save(member);
 
-        return ResponseEntity.ok("회원가입 성공");
+        Message message = Message.builder()
+                .message("회원가입이 완료됨")
+                .build();
+
+        return SuccessResponse.of(message);
     }
 
     @Override
     @Transactional
-    public ResponseEntity<?> login(LoginReq loginReq) {
+    public SuccessResponse<LoginRes> login(LoginReq loginReq) {
         String email = loginReq.getEmail();
         String password = loginReq.getPassword();
 
@@ -88,6 +94,6 @@ public class AuthServiceImpl implements AuthService {
                 .refreshToken(refreshToken)
                 .build();
 
-        return ResponseEntity.ok(loginRes);
+        return SuccessResponse.of(loginRes);
     }
 }
