@@ -35,3 +35,12 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Database ###
+/src/main/resources/application-db.yml
+
+### ChatGPT ###
+/src/main/resources/application-chatgpt.yml
+
+### jwt ###
+/src/main/resources/application-jwt.yml
