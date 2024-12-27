@@ -3,19 +3,23 @@ name: CI/CD with Gradle + Docker
 on:
   push:
     branches: [ "main" ]
+
 permissions:
   contents: read
+
 jobs:
   build-docker-image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
       # Java 17 세팅
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
+
       # gradle caching
       - name: Gradle Caching
         uses: actions/cache@v3
@@ -26,11 +30,20 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
+
       # create application-database.yml
       - name: create application.yml file
         run: |
           touch ./src/main/resources/application-db.yml
           echo "${{ secrets.DATABASE_YML }}" >> src/main/resources/application-db.yml
+          
+          touch ./src/main/resources/application-jwt.yml
+          echo "${{ secrets.JWT_YML }}" >> src/main/resources/application-jwt.yml
+          
+          touch ./src/main/resources/application-chatgpt.yml
+          echo "${{ secrets.CHATGPT_YML }} >> src/main/resources/application-chatgpt.yml
+      
+
       # 빌드 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -39,18 +52,23 @@ jobs:
         uses: gradle/gradle-build-action@0d13054264b0bb894ded474f08ebb30921341cee
         with:
           arguments: clean build -x test
+
       # Docker 이미지 빌드
       - name: docker image build
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }} .
+
       # DockerHub 로그인
       - name: docker login
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
       # Docker Hub 이미지 푸시
       - name: docker Hub push
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPOSITORY }}
+
+  # Docker-EC2 연동
   run-docker-image-on-ec2:
     needs: build-docker-image
     runs-on: ubuntu-latest
