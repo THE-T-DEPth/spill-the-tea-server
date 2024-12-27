@@ -41,8 +41,7 @@ jobs:
           echo "${{ secrets.JWT_YML }}" >> src/main/resources/application-jwt.yml
           
           touch ./src/main/resources/application-chatgpt.yml
-          echo "${{ secrets.CHATGPT_YML }} >> src/main/resources/application-chatgpt.yml
-      
+          echo "${{ secrets.CHATGPT_YML }}" >> src/main/resources/application-chatgpt.yml
 
       # 빌드 권한 부여
       - name: Grant execute permission for gradlew
