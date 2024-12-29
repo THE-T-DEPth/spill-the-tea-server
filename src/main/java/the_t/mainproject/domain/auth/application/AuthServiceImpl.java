@@ -1,7 +1,6 @@
 package the_t.mainproject.domain.auth.application;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,6 +13,7 @@ import the_t.mainproject.domain.auth.domain.RefreshToken;
 import the_t.mainproject.domain.auth.domain.repository.RefreshTokenRepository;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
+import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
@@ -35,11 +35,21 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public SuccessResponse<Message> join(JoinReq joinReq) {
+        String email = joinReq.getEmail();
+        String nickname = joinReq.getNickname();
+
+        if(memberRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+        if(memberRepository.existsByNickname(nickname)) {
+            throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
+        }
+
         Member member = Member.builder()
-                .email(joinReq.getEmail())
+                .email(email)
                 .name(joinReq.getName())
                 .password(passwordEncoder.encode(joinReq.getPassword()))
-                .nickname(joinReq.getNickname())
+                .nickname(nickname)
                 .build();
 
         memberRepository.save(member);
@@ -95,5 +105,23 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         return SuccessResponse.of(loginRes);
+    }
+
+    @Override
+    public SuccessResponse<DuplicateCheckRes> checkEmailDuplicate(String email) {
+        DuplicateCheckRes emailDuplicateCheckRes = DuplicateCheckRes.builder()
+                .availability(!memberRepository.existsByEmail(email))
+                .build();
+
+        return SuccessResponse.of(emailDuplicateCheckRes);
+    }
+
+    @Override
+    public SuccessResponse<DuplicateCheckRes> checkNicknameDuplicate(String nickname) {
+        DuplicateCheckRes nicknameDuplicateCheckRes = DuplicateCheckRes.builder()
+                .availability(!memberRepository.existsByNickname(nickname))
+                .build();
+
+        return SuccessResponse.of(nicknameDuplicateCheckRes);
     }
 }
