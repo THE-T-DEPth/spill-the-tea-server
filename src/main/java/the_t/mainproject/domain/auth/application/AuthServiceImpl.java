@@ -14,6 +14,7 @@ import the_t.mainproject.domain.auth.domain.RefreshToken;
 import the_t.mainproject.domain.auth.domain.repository.RefreshTokenRepository;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
+import the_t.mainproject.domain.auth.dto.response.EmailDuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
@@ -35,8 +36,13 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public SuccessResponse<Message> join(JoinReq joinReq) {
+        String email = joinReq.getEmail();
+        if(memberRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+
         Member member = Member.builder()
-                .email(joinReq.getEmail())
+                .email(email)
                 .name(joinReq.getName())
                 .password(passwordEncoder.encode(joinReq.getPassword()))
                 .nickname(joinReq.getNickname())
@@ -95,5 +101,14 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         return SuccessResponse.of(loginRes);
+    }
+
+    @Override
+    public SuccessResponse<EmailDuplicateCheckRes> checkEmailDuplicate(String email) {
+        EmailDuplicateCheckRes emailDuplicateCheckRes = EmailDuplicateCheckRes.builder()
+                .availability(!memberRepository.existsByEmail(email))
+                .build();
+
+        return SuccessResponse.of(emailDuplicateCheckRes);
     }
 }
