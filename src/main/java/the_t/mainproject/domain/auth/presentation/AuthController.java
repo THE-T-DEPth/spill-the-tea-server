@@ -32,7 +32,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginReq));
     }
 
-    @GetMapping("/email")
+    @GetMapping("/duplicate")
     public ResponseEntity<SuccessResponse<EmailDuplicateCheckRes>> checkEmailDuplicate(@RequestParam(value = "email") String email) {
         return ResponseEntity.ok(authService.checkEmailDuplicate(email));
     }
