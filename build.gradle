@@ -57,6 +57,9 @@ dependencies {
 
 	// chatgpt
 	implementation 'io.github.flashvayne:chatgpt-spring-boot-starter:1.0.4'
+
+	// swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
 }
 tasks.named('test') {
 	useJUnitPlatform()
