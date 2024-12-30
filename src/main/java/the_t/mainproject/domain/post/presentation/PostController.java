@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.post.application.PostService;
 import the_t.mainproject.domain.post.dto.req.PostReq;
+import the_t.mainproject.domain.post.dto.res.PostDetailRes;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
@@ -45,5 +46,11 @@ public class PostController {
     public ResponseEntity<SuccessResponse<Message>> deletePost(@PathVariable Long postId,
                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(postService.deletePost(postId, userDetails));
+    }
+
+    @Operation(summary = "게시글 상세 조회")
+    @GetMapping("/{postId}")
+    public ResponseEntity<SuccessResponse<PostDetailRes>> getPost(@PathVariable Long postId) {
+        return ResponseEntity.ok(postService.getPost(postId));
     }
 }

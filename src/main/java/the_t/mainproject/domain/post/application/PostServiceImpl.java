@@ -11,6 +11,7 @@ import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.VoiceType;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.domain.post.dto.req.PostReq;
+import the_t.mainproject.domain.post.dto.res.PostDetailRes;
 import the_t.mainproject.domain.postkeyword.PostKeyword;
 import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
 import the_t.mainproject.global.common.Message;
@@ -117,5 +118,22 @@ public class PostServiceImpl implements PostService {
         return SuccessResponse.of(Message.builder()
                 .message("게시글 삭제가 완료됨")
                 .build());
+    }
+
+    @Override
+    public SuccessResponse<PostDetailRes> getPost(Long postId) {
+        // post 찾기
+        Post post = postRepository.findById(postId)
+                .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        PostDetailRes postDetailRes = PostDetailRes.builder()
+                .postId(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .thumb(post.getThumb())
+                .likedCount(post.getLikedCount())
+                .commentCount(post.getCommentCount())
+                .voiceType(post.getVoiceType().toString())
+                .build();
+        return SuccessResponse.of(postDetailRes);
     }
 }
