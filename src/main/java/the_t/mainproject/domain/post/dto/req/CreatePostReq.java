@@ -2,6 +2,7 @@ package the_t.mainproject.domain.post.dto.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,8 @@ public class CreatePostReq {
     @Schema(type = "String", example = "내용 예시", description = "내용. 소설화 적용 시 변환된 내용으로, 미적용 시는 원본 내용으로 작성해주세요")
     private String content;
 
-    @NotBlank(message = "키워드 3개를 입력해주세요")
+    @NotEmpty(message = "키워드 3개를 입력해주세요")
+    @Size(min = 3, max = 3, message = "키워드는 3개만 입력해주세요")
     @Schema(type = "List<String>", example = "[\"우정\", \"실수\", \"고민\"]", description = "키워드 3개를 리스트로 전달해주세요.")
     private List<String> keyword;
 
