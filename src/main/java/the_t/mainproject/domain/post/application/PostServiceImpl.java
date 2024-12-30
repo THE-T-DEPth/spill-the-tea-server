@@ -27,6 +27,7 @@ public class PostServiceImpl implements PostService {
     private final PostKeywordRepository postKeywordRepository;
 
     @Override
+    @Transactional
     public SuccessResponse<Message> createPost(PostReq postReq, MultipartFile image,
                                                UserDetailsImpl userDetails) {
         // post 생성 및 저장
