@@ -2,6 +2,7 @@ package the_t.mainproject.domain.post.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.keyword.domain.Keyword;
 import the_t.mainproject.domain.keyword.domain.repository.KeywordRepository;
@@ -14,6 +15,8 @@ import the_t.mainproject.domain.postkeyword.PostKeyword;
 import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
+import the_t.mainproject.global.exception.BusinessException;
+import the_t.mainproject.global.exception.ErrorCode;
 import the_t.mainproject.global.security.UserDetailsImpl;
 import the_t.mainproject.global.service.S3Service;
 
@@ -59,4 +62,45 @@ public class PostServiceImpl implements PostService {
                 .message("게시글 등록이 완료됨")
                 .build());
     }
+
+    @Override
+    @Transactional
+    public SuccessResponse<Message> updatePost(Long postId, PostReq postReq, MultipartFile image,
+                                               UserDetailsImpl userDetails) {
+        // post 찾기
+        Post post = postRepository.findById(postId)
+                .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
+        }
+        // post 제목, 내용, 음성 유형 수정
+        post.updatePost(postReq.getTitle(), postReq.getContent(), VoiceType.valueOf(postReq.getVoice_type()));
+
+        // 썸네일 수정
+        if (!image.isEmpty()){
+            post.updateThumb(s3Service.uploadImage(image));
+        }
+
+        // PostKeyword 삭제
+        postKeywordRepository.deleteAllByPostId(postId);
+
+        // 키워드 저장
+        postReq.getKeyword().forEach(keywordName -> {
+            // 기존 키워드 가져오기 또는 생성
+            Keyword keyword = keywordRepository.findByName(keywordName)
+                    .orElseGet(() -> keywordRepository.save(new Keyword(keywordName)));
+
+            // PostKeyword 엔티티 생성 및 저장
+            PostKeyword postKeyword = PostKeyword.builder()
+                    .post(post)
+                    .keyword(keyword)
+                    .build();
+
+            postKeywordRepository.save(postKeyword);
+        });
+        return SuccessResponse.of(Message.builder()
+                .message("게시글 수정이 완료됨")
+                .build());
+    }
+
 }

@@ -30,5 +30,11 @@ public class PostController {
                 .status(HttpStatus.CREATED)
                 .body(postService.createPost(postReq, image, userDetails));
     }
+
+    @Operation(summary = "게시글 삭제")
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<SuccessResponse<Message>> updatePost(@PathVariable Long postId,
+                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(postService.deletePost(postId, userDetails));
     }
 }

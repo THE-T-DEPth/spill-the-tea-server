@@ -8,4 +8,5 @@ import the_t.mainproject.global.security.UserDetailsImpl;
 
 public interface PostService {
     SuccessResponse<Message> createPost(PostReq request, MultipartFile image, UserDetailsImpl userDetails);
+    SuccessResponse<Message> updatePost(Long postId, PostReq postReq, MultipartFile image, UserDetailsImpl userDetails);
 }
