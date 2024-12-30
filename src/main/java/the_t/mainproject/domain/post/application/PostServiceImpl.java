@@ -27,7 +27,8 @@ public class PostServiceImpl implements PostService {
     private final PostKeywordRepository postKeywordRepository;
 
     @Override
-    public void createPost(CreatePostReq createPostReq, MultipartFile image, UserDetailsImpl userDetails) {
+    public SuccessResponse<Message> createPost(CreatePostReq createPostReq, MultipartFile image,
+                                               UserDetailsImpl userDetails) {
         // post 생성 및 저장
         Post post = Post.builder()
                         .title(createPostReq.getTitle())
@@ -53,5 +54,8 @@ public class PostServiceImpl implements PostService {
             postKeywordRepository.save(postKeyword);
         });
 
+        return SuccessResponse.of(Message.builder()
+                .message("게시글 등록이 완료됨")
+                .build());
     }
 }
