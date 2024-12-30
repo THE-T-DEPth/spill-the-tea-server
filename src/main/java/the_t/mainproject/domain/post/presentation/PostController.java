@@ -31,9 +31,18 @@ public class PostController {
                 .body(postService.createPost(postReq, image, userDetails));
     }
 
+    @Operation(summary = "게시글 수정")
+    @PutMapping("/{postId}")
+    public ResponseEntity<SuccessResponse<Message>> updatePost(@PathVariable Long postId,
+                                                               @Valid @RequestPart PostReq postReq,
+                                                               @RequestPart(value = "image") MultipartFile image,
+                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(postService.updatePost(postId, postReq, image, userDetails));
+    }
+
     @Operation(summary = "게시글 삭제")
     @DeleteMapping("/{postId}")
-    public ResponseEntity<SuccessResponse<Message>> updatePost(@PathVariable Long postId,
+    public ResponseEntity<SuccessResponse<Message>> deletePost(@PathVariable Long postId,
                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(postService.deletePost(postId, userDetails));
     }

@@ -103,4 +103,19 @@ public class PostServiceImpl implements PostService {
                 .build());
     }
 
+    @Override
+    @Transactional
+    public SuccessResponse<Message> deletePost(Long postId, UserDetailsImpl userDetails) {
+        // post 찾기
+        Post post = postRepository.findById(postId)
+                .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
+            throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
+        }
+        postKeywordRepository.deleteAllByPostId(postId);
+        postRepository.deleteById(postId);
+        return SuccessResponse.of(Message.builder()
+                .message("게시글 삭제가 완료됨")
+                .build());
+    }
 }
