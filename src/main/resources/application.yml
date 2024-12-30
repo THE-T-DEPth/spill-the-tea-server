@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: ["db", "chatgpt", "jwt"]
+    active: ["db", "chatgpt", "jwt", "aws"]
 
 web:
   resources:
