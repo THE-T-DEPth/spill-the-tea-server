@@ -13,7 +13,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Getter
-public class CreatePostReq {
+public class PostReq {
     private final String voiceTypeList = Arrays.toString(VoiceType.values());
 
     @NotBlank(message = "제목을 입력해주세요")

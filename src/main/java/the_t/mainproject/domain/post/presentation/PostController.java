@@ -9,7 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.post.application.PostService;
-import the_t.mainproject.domain.post.dto.req.CreatePostReq;
+import the_t.mainproject.domain.post.dto.req.PostReq;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
@@ -23,11 +23,12 @@ public class PostController {
 
     @Operation(summary = "게시글 등록")
     @PostMapping("")
-    public ResponseEntity<SuccessResponse<Message>> createPost(@Valid @RequestPart CreatePostReq createPostReq,
+    public ResponseEntity<SuccessResponse<Message>> createPost(@Valid @RequestPart PostReq postReq,
                                                                @RequestPart(value = "image") MultipartFile image,
                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(postService.createPost(createPostReq, image, userDetails));
+                .body(postService.createPost(postReq, image, userDetails));
+    }
     }
 }

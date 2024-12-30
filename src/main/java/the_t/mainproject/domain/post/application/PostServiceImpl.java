@@ -9,7 +9,7 @@ import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.VoiceType;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
-import the_t.mainproject.domain.post.dto.req.CreatePostReq;
+import the_t.mainproject.domain.post.dto.req.PostReq;
 import the_t.mainproject.domain.postkeyword.PostKeyword;
 import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
 import the_t.mainproject.global.common.Message;
@@ -27,20 +27,20 @@ public class PostServiceImpl implements PostService {
     private final PostKeywordRepository postKeywordRepository;
 
     @Override
-    public SuccessResponse<Message> createPost(CreatePostReq createPostReq, MultipartFile image,
+    public SuccessResponse<Message> createPost(PostReq postReq, MultipartFile image,
                                                UserDetailsImpl userDetails) {
         // post 생성 및 저장
         Post post = Post.builder()
-                        .title(createPostReq.getTitle())
-                        .content(createPostReq.getContent())
+                        .title(postReq.getTitle())
+                        .content(postReq.getContent())
                         .thumb(s3Service.uploadImage(image))
-                        .voiceType(VoiceType.valueOf(createPostReq.getVoice_type()))
+                        .voiceType(VoiceType.valueOf(postReq.getVoice_type()))
                         .member(memberRepository.findByEmail(userDetails.getUsername()).get())
                         .build();
         postRepository.save(post);
 
         // 키워드 저장
-        createPostReq.getKeyword().forEach(keywordName -> {
+        postReq.getKeyword().forEach(keywordName -> {
             // 기존 키워드 가져오기 또는 생성
             Keyword keyword = keywordRepository.findByName(keywordName)
                     .orElseGet(() -> keywordRepository.save(new Keyword(keywordName)));
