@@ -32,7 +32,7 @@ public class SecurityConfig {
     private final RefreshTokenRepository refreshTokenRepository;
 
     private final String[] WHITE_LIST = {
-            "/auth/**", "/test"
+            "/auth/**", "/test", "/mails/**"
     };
 
     @Bean
