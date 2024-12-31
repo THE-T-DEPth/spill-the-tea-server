@@ -5,4 +5,5 @@ import the_t.mainproject.domain.postkeyword.PostKeyword;
 
 public interface PostKeywordRepository extends JpaRepository<PostKeyword, Long> {
 
+    void deleteAllByPostId(Long postId);
 }
