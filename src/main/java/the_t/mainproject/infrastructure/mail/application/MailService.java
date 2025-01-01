@@ -6,6 +6,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.infrastructure.mail.MailUtil;
 import the_t.mainproject.infrastructure.mail.dto.MailCodeRes;
@@ -40,19 +41,19 @@ public class MailService {
         return SuccessResponse.of(mailCodeRes);
     }
 
-    public void verifyCode(String code) {
+    public SuccessResponse<Message> verifyCode(String code) {
         String data = redisUtil.getData(code);
         if (data == null)
-            throw new IllegalArgumentException("유효하지 않은 코드입니다.");
+            throw new IllegalArgumentException("인증번호가 동일하지 않습니다.");
 
         redisUtil.deleteData(code);
-        redisUtil.setDataExpire(data + VERIFY_SUFFIX, String.valueOf(true), 60 * 60L);
-//
-//        Message message = Message.builder()
-//                .message("이메일 인증이 완료되었습니다.")
-//                .build();
-//
-//        return SuccessResponse.of(message);
+        redisUtil.setDataExpire(data + VERIFY_SUFFIX, String.valueOf(true), 60 * 5L);
+
+        Message message = Message.builder()
+                .message("이메일 인증이 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
     }
 
 }

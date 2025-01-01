@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.infrastructure.mail.application.MailService;
 import the_t.mainproject.infrastructure.mail.dto.MailCodeRes;
@@ -29,9 +30,7 @@ public class MailController {
 
     @Operation(summary = "인증 코드 검증")
     @GetMapping(value = "/verify")
-    public void verify(@RequestParam String code, HttpServletResponse response) throws IOException {
-        mailService.verifyCode(code);
-        String redirect_url = "http://www.google.com";
-        response.sendRedirect(redirect_url);
+    public ResponseEntity<SuccessResponse<Message>> verify(@RequestParam String code) {
+        return ResponseEntity.ok(mailService.verifyCode(code));
     }
 }
