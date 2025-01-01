@@ -25,6 +25,6 @@ public class MailController {
 
     @GetMapping(value = "/verify")
     public ResponseEntity<SuccessResponse<Message>> verify(@RequestParam String code) {
-        return ResponseEntity.ok(SuccessResponse.of(Message.builder().message("verify 호출").build()));
+        return ResponseEntity.ok(mailService.verifyCode(code));
     }
 }

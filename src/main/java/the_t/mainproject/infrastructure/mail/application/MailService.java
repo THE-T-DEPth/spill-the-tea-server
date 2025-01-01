@@ -8,8 +8,10 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.infrastructure.mail.dto.MailCodeRes;
+import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 import java.security.SecureRandom;
 
@@ -25,9 +27,11 @@ public class MailService {
     private String fromEmail;
 
     private final JavaMailSender mailSender;
+    private final RedisUtil redisUtil;
 
     public SuccessResponse<MailCodeRes> sendMail(String email) throws Exception {
         String code = generateCode();
+        redisUtil.setDataExpire(code, String.valueOf(false), 60*3L);
         MimeMessage mimeMessage = createMessage(code, email);
         mailSender.send(mimeMessage);
 
@@ -36,6 +40,20 @@ public class MailService {
                 .build();
 
         return SuccessResponse.of(mailCodeRes);
+    }
+
+    public SuccessResponse<Message> verifyCode(String code) {
+        String data = redisUtil.getData(code);
+        if (data == null)
+            throw new IllegalArgumentException("유효하지 않은 코드입니다.");
+
+        redisUtil.setDataExpire(code, String.valueOf(true), 60 * 60L);
+
+        Message message = Message.builder()
+                .message("이메일 인증이 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
     }
 
     private MimeMessage createMessage(String code, String email) throws MessagingException {
