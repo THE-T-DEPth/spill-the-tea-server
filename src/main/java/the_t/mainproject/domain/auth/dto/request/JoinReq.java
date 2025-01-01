@@ -1,5 +1,6 @@
 package the_t.mainproject.domain.auth.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -9,21 +10,25 @@ import lombok.Data;
 @Data
 public class JoinReq {
 
-    @NotBlank
+    @NotBlank(message = "이메일을 입력해주세요")
     @Email
+    @Schema(type = "String", example = "spillthetea@gmail.com", description = "이메일")
     private String email;
 
-    @NotBlank
-    @Size(min = 8, max = 20)
+    @NotBlank(message = "비밀번호를 입력해주세요")
+    @Size(min = 8, max = 20, message = "최소 8자 최대 20자까지 가능합니다")
     @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-={}\\[\\]|:;\"'<>,.?/~`])[A-Za-z\\d!@#$%^&*()_+\\-={}\\[\\]|:;\"'<>,.?/~`]*$")
+    @Schema(type = "String", example = "password1!", description = "비밀번호")
     private String password;
 
-    @NotBlank
-    @Size(min = 2, max = 8)
+    @NotBlank(message = "이름을 입력해주세요")
+    @Size(min = 2, max = 8, message = "이름은 최소 2자 최대 8자까지 가능합니다")
+    @Schema(type = "String", example = "김더티", description = "이름")
     private String name;
 
-    @NotBlank
-    @Size(min = 2, max = 8)
+    @NotBlank(message = "닉네임을 입력해주세요")
+    @Size(min = 2, max = 8, message = "닉네임은 최소 2자 최대 8자까지 가능합니다.")
     @Pattern(regexp = "^[a-zA-Z가-힣\\d]+$")
+    @Schema(type = "String", example = "서버핑", description = "닉네임")
     private String nickname;
 }
