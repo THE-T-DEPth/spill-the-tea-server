@@ -20,6 +20,7 @@ import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.jwt.JwtTokenProvider;
+import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,6 +29,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final MemberRepository memberRepository;
     private final AuthenticationManager authenticationManager;
+    private final RedisUtil redisUtil;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
@@ -44,6 +46,12 @@ public class AuthServiceImpl implements AuthService {
         if(memberRepository.existsByNickname(nickname)) {
             throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
         }
+
+        String data = redisUtil.getData(email + "_verify");
+        if(data == null) {
+            throw new IllegalArgumentException("인증이 필요한 이메일입니다.");
+        }
+        redisUtil.deleteData(email + "_verify");
 
         Member member = Member.builder()
                 .email(email)

@@ -45,5 +45,5 @@ out/
 ### jwt ###
 /src/main/resources/application-jwt.yml
 
-### aws ###
-/src/main/resources/application-aws.yml
+### infra ###
+/src/main/resources/application-infra.yml

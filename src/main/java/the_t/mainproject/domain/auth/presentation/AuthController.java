@@ -1,5 +1,6 @@
 package the_t.mainproject.domain.auth.presentation;
 
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,7 @@ public class AuthController {
 
     private final AuthServiceImpl authService;
 
+    @Operation(summary = "회원가입")
     @PostMapping("/join")
     public ResponseEntity<SuccessResponse<Message>> join(@Valid @RequestBody JoinReq joinReq) {
         return ResponseEntity
@@ -27,16 +29,19 @@ public class AuthController {
                 .body(authService.join(joinReq));
     }
 
+    @Operation(summary = "로그인")
     @PostMapping("/login")
     public ResponseEntity<SuccessResponse<LoginRes>> login(@Valid @RequestBody LoginReq loginReq) {
         return ResponseEntity.ok(authService.login(loginReq));
     }
 
+    @Operation(summary = "이메일 중복체크")
     @GetMapping("/emails")
     public ResponseEntity<SuccessResponse<DuplicateCheckRes>> checkEmailDuplicate(@RequestParam(value = "email") String email) {
         return ResponseEntity.ok(authService.checkEmailDuplicate(email));
     }
 
+    @Operation(summary = "닉네임 중복체크")
     @GetMapping("/nicknames")
     public ResponseEntity<SuccessResponse<DuplicateCheckRes>> checkNicknameDuplicate(@RequestParam(value = "nickname") String nickname) {
         return ResponseEntity.ok(authService.checkNicknameDuplicate(nickname));
