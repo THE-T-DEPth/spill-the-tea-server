@@ -50,13 +50,25 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core'
 	implementation "org.flywaydb:flyway-mysql"
 
+	// SMTP
+	implementation'org.springframework.boot:spring-boot-starter-mail'
+
+	// Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// chatgpt
+	implementation 'io.github.flashvayne:chatgpt-spring-boot-starter:1.0.4'
+
+	// swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
+	// AWS S3
+	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.4.4'
+
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 //    testImplementation 'org.springframework.security:spring-security-test'
-
-	// chatgpt
-	implementation 'io.github.flashvayne:chatgpt-spring-boot-starter:1.0.4'
 }
 tasks.named('test') {
 	useJUnitPlatform()

@@ -2,7 +2,10 @@ package the_t.mainproject.domain.post.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import the_t.mainproject.domain.common.BaseEntity;
 import the_t.mainproject.domain.member.domain.Member;
 
@@ -55,5 +58,15 @@ public class Post extends BaseEntity {
         this.commentCount = 0;
         this.reportedCount = 0;
         this.voiceType = voiceType;
+    }
+
+    public void updatePost(String title, String content, VoiceType voiceType) {
+        this.title = title;
+        this.content = content;
+        this.voiceType = voiceType;
+    }
+
+    public void updateThumb(String thumb) {
+        this.thumb = thumb;
     }
 }

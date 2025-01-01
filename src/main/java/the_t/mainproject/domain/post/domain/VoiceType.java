@@ -7,9 +7,17 @@ import lombok.Getter;
 @Getter
 public enum VoiceType {
 
-    MALE("MALE", "성인 남성"),
-    FEMALE("FEMALE", "성인 여성");
+    none,
+    ko_KR_Neural2_A,
+    ko_KR_Neural2_B,
+    ko_KR_Neural2_C,
+    ko_KR_Standard_A,
+    ko_KR_Standard_B,
+    ko_KR_Standard_C,
+    ko_KR_Standard_D,
+    ko_KR_Wavenet_A,
+    ko_KR_Wavenet_B,
+    ko_KR_Wavenet_C,
+    ko_KR_Wavenet_D;
 
-    String key;
-    String value;
 }
