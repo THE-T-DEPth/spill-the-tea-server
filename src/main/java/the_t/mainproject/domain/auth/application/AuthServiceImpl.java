@@ -133,7 +133,6 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public SuccessResponse<Message> modifyPassword(ModifyPasswordReq modifyPasswordReq) {
         String email = modifyPasswordReq.getEmail();
-        checkVerify(email);
 
         memberRepository.findByEmail(email)
                 .ifPresentOrElse(

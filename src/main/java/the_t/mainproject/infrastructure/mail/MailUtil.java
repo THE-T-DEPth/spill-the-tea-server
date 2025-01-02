@@ -9,6 +9,9 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -43,5 +46,35 @@ public class MailUtil {
         code = String.format("%8s", code).replace(' ', '0');
 
         return code;
+    }
+
+    public String generatePassword() {
+        SecureRandom random = new SecureRandom();
+        // 비밀번호 구성 요소
+        String upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lowerCaseLetters = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String specialCharacters = "!@#$%^&*()_+-={}[]|:;\"'<>,.?/~`";
+        // 하나씩 반드시 포함
+        char upper = upperCaseLetters.charAt(random.nextInt(upperCaseLetters.length()));
+        char lower = lowerCaseLetters.charAt(random.nextInt(lowerCaseLetters.length()));
+        char digit = digits.charAt(random.nextInt(digits.length()));
+        char special = specialCharacters.charAt(random.nextInt(specialCharacters.length()));
+        // 나머지는 랜덤 조합
+        String allCharacters = upperCaseLetters + lowerCaseLetters + digits + specialCharacters;
+        StringBuilder tempPassword = new StringBuilder();
+        tempPassword.append(upper).append(lower).append(digit).append(special);
+        for (int i = 4; i < 12; i++) { // 최소 8자리 이상, 최대 12자리
+            tempPassword.append(allCharacters.charAt(random.nextInt(allCharacters.length())));
+        }
+        // 비밀번호를 랜덤하게 섞음
+        List<Character> passwordChars = tempPassword.chars()
+                .mapToObj(c -> (char) c)
+                .collect(Collectors.toList());
+        Collections.shuffle(passwordChars);
+
+        return passwordChars.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining());
     }
 }

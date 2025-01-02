@@ -3,14 +3,12 @@ package the_t.mainproject.infrastructure.mail.presentation;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.infrastructure.mail.application.MailService;
 import the_t.mainproject.infrastructure.mail.dto.MailCodeRes;
+import the_t.mainproject.infrastructure.mail.dto.TempPasswordRes;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,5 +33,11 @@ public class MailController {
     @GetMapping(value = "/password")
     public ResponseEntity<SuccessResponse<MailCodeRes>> sendPasswordMail(@RequestParam String email) throws Exception {
         return ResponseEntity.ok(mailService.sendPasswordMail(email));
+    }
+
+    @Operation(summary = "비밀번호 인증코드 검증 및 임시 비밀번호 발급")
+    @PostMapping(value = "/password/verify")
+    public ResponseEntity<SuccessResponse<TempPasswordRes>> verifyPasswordCode(@RequestParam String code) {
+        return ResponseEntity.ok(mailService.passwordEmailCode(code));
     }
 }

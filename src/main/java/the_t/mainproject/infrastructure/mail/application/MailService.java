@@ -3,13 +3,16 @@ package the_t.mainproject.infrastructure.mail.application;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.infrastructure.mail.MailUtil;
 import the_t.mainproject.infrastructure.mail.dto.MailCodeRes;
+import the_t.mainproject.infrastructure.mail.dto.TempPasswordRes;
 import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class MailService {
     private final JavaMailSender mailSender;
     private final RedisUtil redisUtil;
     private final MailUtil mailUtil;
+    private final PasswordEncoder passwordEncoder;
 
     private final MemberRepository memberRepository;
 
@@ -64,19 +68,25 @@ public class MailService {
 
     // 비밀번호 변경 인증번호 검증
     @Transactional
-    public SuccessResponse<Message> passwordEmailCode(String code) {
-        String data = redisUtil.getData(code);
-        if (data == null)
+    public SuccessResponse<TempPasswordRes> passwordEmailCode(String code) {
+        String email = redisUtil.getData(code);
+        if (email == null)
             throw new IllegalArgumentException("인증번호가 동일하지 않습니다.");
 
         redisUtil.deleteData(code);
-        redisUtil.setDataExpire(data + PASSWORD_SUFFIX, String.valueOf(true), 60 * 5L);
+        redisUtil.setDataExpire(email + PASSWORD_SUFFIX, String.valueOf(true), 60 * 5L);
 
-        Message message = Message.builder()
-                .message("비밀번호 인증이 완료되었습니다.")
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("해당 이메일의 유저를 찾을 수 없습니다."));
+
+        String tempPassword = mailUtil.generatePassword();
+        member.updatePassword(passwordEncoder.encode(tempPassword));
+
+        TempPasswordRes tempPasswordRes = TempPasswordRes.builder()
+                .temp_password(tempPassword)
                 .build();
 
-        return SuccessResponse.of(message);
+        return SuccessResponse.of(tempPasswordRes);
     }
 
     // 인증번호 전송 공통 메서드
