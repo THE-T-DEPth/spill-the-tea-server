@@ -13,6 +13,7 @@ import the_t.mainproject.domain.auth.domain.RefreshToken;
 import the_t.mainproject.domain.auth.domain.repository.RefreshTokenRepository;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
+import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.member.domain.Member;
@@ -38,6 +39,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public SuccessResponse<Message> join(JoinReq joinReq) {
         String email = joinReq.getEmail();
+        checkVerify(email);
         String nickname = joinReq.getNickname();
 
         if(memberRepository.existsByEmail(email)) {
@@ -46,12 +48,6 @@ public class AuthServiceImpl implements AuthService {
         if(memberRepository.existsByNickname(nickname)) {
             throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
         }
-
-        String data = redisUtil.getData(email + "_verify");
-        if(data == null) {
-            throw new IllegalArgumentException("인증이 필요한 이메일입니다.");
-        }
-        redisUtil.deleteData(email + "_verify");
 
         Member member = Member.builder()
                 .email(email)
@@ -131,5 +127,34 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         return SuccessResponse.of(nicknameDuplicateCheckRes);
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponse<Message> modifyPassword(ModifyPasswordReq modifyPasswordReq) {
+        String email = modifyPasswordReq.getEmail();
+        checkVerify(email);
+
+        memberRepository.findByEmail(email)
+                .ifPresentOrElse(
+                        member -> member.updatePassword(passwordEncoder.encode(modifyPasswordReq.getPassword())),
+                        () -> {
+                            throw new IllegalArgumentException("해당 이메일로 가입한 계정이 없습니다.");
+                        }
+                );
+
+        Message message = Message.builder()
+                .message("비밀번호 변경 완료")
+                .build();
+
+        return SuccessResponse.of(message);
+    }
+
+    private void checkVerify(String email) {
+        String data = redisUtil.getData(email + "_verify");
+        if(data == null) {
+            throw new IllegalArgumentException("인증이 필요한 이메일입니다.");
+        }
+        redisUtil.deleteData(email + "_verify");
     }
 }

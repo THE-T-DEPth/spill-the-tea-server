@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import the_t.mainproject.domain.auth.application.AuthServiceImpl;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
+import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.global.common.Message;
@@ -45,5 +46,11 @@ public class AuthController {
     @GetMapping("/nicknames")
     public ResponseEntity<SuccessResponse<DuplicateCheckRes>> checkNicknameDuplicate(@RequestParam(value = "nickname") String nickname) {
         return ResponseEntity.ok(authService.checkNicknameDuplicate(nickname));
+    }
+
+    @Operation(summary = "비밀번호 변경")
+    @PutMapping("/password")
+    public ResponseEntity<SuccessResponse<Message>> modifyPassword(@Valid @RequestBody ModifyPasswordReq modifyPasswordReq) {
+        return ResponseEntity.ok(authService.modifyPassword(modifyPasswordReq));
     }
 }
