@@ -121,6 +121,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SuccessResponse<PostDetailRes> getPost(Long postId) {
         // post 찾기
         Post post = postRepository.findById(postId)
