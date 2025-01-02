@@ -1,6 +1,7 @@
 package the_t.mainproject.global.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,19 @@ public class S3Service {
 		return getUrl(saveFileName);
 	}
 
+	@Transactional
+	public void deleteImage(String url) {
+		String s3Key = extractS3KeyFromUrl(url);
+		if (s3Key.isEmpty()) {
+			throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
+		}
+		try {
+			amazonS3.deleteObject(new DeleteObjectRequest(BUCKET, s3Key));
+		} catch (Exception e) {
+			throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
+		}
+	}
+
 	public String convertToRandomName(String originalFileName) {
 		String fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
 		return UUID.randomUUID().toString().concat(fileExtension);
@@ -57,5 +71,9 @@ public class S3Service {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다.");
 		}
 		return amazonS3.getUrl(BUCKET, s3key).toString();
+	}
+
+	private String extractS3KeyFromUrl(String url) {
+		return url.substring(url.lastIndexOf("/") + 1);
 	}
 }

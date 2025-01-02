@@ -83,7 +83,12 @@ public class PostServiceImpl implements PostService {
         post.updatePost(postReq.getTitle(), postReq.getContent(), VoiceType.valueOf(postReq.getVoice_type()));
 
         // 썸네일 수정
-        if (!image.isEmpty()){
+        if (!image.isEmpty()) {
+            // 기존 썸네일 삭제
+            if (post.getThumb() != null && !post.getThumb().isEmpty()) {
+                s3Service.deleteImage(post.getThumb());
+            }
+            // 새 이미지 업로드 및 업데이트
             post.updateThumb(s3Service.uploadImage(image));
         }
 
@@ -117,6 +122,9 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
         if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
+        }
+        if (post.getThumb() != null && !post.getThumb().isEmpty()) {
+            s3Service.deleteImage(post.getThumb());
         }
         postKeywordRepository.deleteAllByPostId(postId);
         postRepository.deleteById(postId);
