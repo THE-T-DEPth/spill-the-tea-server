@@ -6,11 +6,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.keyword.domain.Keyword;
 import the_t.mainproject.domain.keyword.domain.repository.KeywordRepository;
+import the_t.mainproject.domain.liked.domain.Liked;
+import the_t.mainproject.domain.liked.domain.repository.LikedRepository;
+import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.VoiceType;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.domain.post.dto.req.PostReq;
+import the_t.mainproject.domain.post.dto.res.LikedCountRes;
 import the_t.mainproject.domain.post.dto.res.PostDetailRes;
 import the_t.mainproject.domain.postkeyword.PostKeyword;
 import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
@@ -29,6 +33,7 @@ public class PostServiceImpl implements PostService {
     private final MemberRepository memberRepository;
     private final KeywordRepository keywordRepository;
     private final PostKeywordRepository postKeywordRepository;
+    private final LikedRepository likedRepository;
 
     @Override
     @Transactional
@@ -136,5 +141,31 @@ public class PostServiceImpl implements PostService {
                 .voiceType(post.getVoiceType().toString())
                 .build();
         return SuccessResponse.of(postDetailRes);
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponse<LikedCountRes> likePost(Long postId, UserDetailsImpl userDetails) {
+        // post 찾기
+        Post post = postRepository.findById(postId)
+                .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        // 이미 공감을 눌렀는지 확인
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).get();
+        if (likedRepository.existsByMemberId(member.getId())){
+            throw new BusinessException(ErrorCode.ALREADY_EXISTS);
+        }
+        Liked liked = Liked.builder()
+                .member(member)
+                .post(post)
+                .build();
+        likedRepository.save(liked);
+        post.addLiked();
+        postRepository.save(post);
+
+        LikedCountRes likedCountRes = LikedCountRes.builder()
+                .postId(postId)
+                .likedCount(post.getLikedCount())
+                .build();
+        return SuccessResponse.of(likedCountRes);
     }
 }

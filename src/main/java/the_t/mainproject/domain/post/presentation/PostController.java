@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.post.application.PostService;
 import the_t.mainproject.domain.post.dto.req.PostReq;
+import the_t.mainproject.domain.post.dto.res.LikedCountRes;
 import the_t.mainproject.domain.post.dto.res.PostDetailRes;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
@@ -52,5 +53,12 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<SuccessResponse<PostDetailRes>> getPost(@PathVariable Long postId) {
         return ResponseEntity.ok(postService.getPost(postId));
+    }
+
+    @Operation(summary = "게시글 공감")
+    @PostMapping("/{postId}")
+    public ResponseEntity<SuccessResponse<LikedCountRes>> likePost(@PathVariable Long postId,
+                                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(postService.likePost(postId, userDetails));
     }
 }
