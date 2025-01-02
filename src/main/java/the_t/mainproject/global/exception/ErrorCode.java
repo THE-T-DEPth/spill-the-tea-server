@@ -60,6 +60,9 @@ public enum ErrorCode {
     // RuntimeException으로 뭔가 잘못된 데이터가 바인딩 됨
     CONFLICT(409, "G013", "Data Integrity Violation Exception"),
 
+    // 이미 처리된 작업 또는 데이터
+    ALREADY_EXISTS(409, "G013", "An attempt was made to create an entity but the entity already exists."),
+
     // 서버가 처리 할 방법을 모르는 경우 발생
     INTERNAL_SERVER_ERROR(500, "G999", "Internal Server Error Exception"),
 
