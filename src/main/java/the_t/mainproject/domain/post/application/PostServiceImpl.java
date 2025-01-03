@@ -1,6 +1,10 @@
 package the_t.mainproject.domain.post.application;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,9 +20,11 @@ import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.domain.post.dto.req.PostReq;
 import the_t.mainproject.domain.post.dto.res.LikedCountRes;
 import the_t.mainproject.domain.post.dto.res.PostDetailRes;
+import the_t.mainproject.domain.post.dto.res.PostListRes;
 import the_t.mainproject.domain.postkeyword.PostKeyword;
 import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
 import the_t.mainproject.global.common.Message;
+import the_t.mainproject.global.common.PageResponse;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.exception.BusinessException;
 import the_t.mainproject.global.exception.ErrorCode;
@@ -211,4 +217,45 @@ public class PostServiceImpl implements PostService {
                 .build();
         return SuccessResponse.of(likedCountRes);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SuccessResponse<PageResponse<PostListRes>> getMyPost(int page, int size, String sortBy,
+                                                                UserDetailsImpl userDetails) {
+        //dafault 설정(DATE_DESC)으로 초기화
+        Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdDate")));
+        switch (sortBy) {
+            // default : DATE_DESC 최근 ~> 과거순
+            case "DATE_DESC" -> pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdDate")));
+            case "DATE_ASC" -> pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("createdDate")));
+            case "TITLE_DESC" -> pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("title")));
+            case "TITLE_ASC" -> pageRequest = PageRequest.of (page, size, Sort.by(Sort.Order.asc("title")));
+            default -> {}
+        }
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).get();
+        Page<Post> postPage = postRepository.findByMemberId(member.getId(), pageRequest);
+
+        // DTO로 변환
+        List<PostListRes> postListRes = postPage.stream()
+                .map(post -> PostListRes.builder()
+                        .postId(post.getId())
+                        .title(post.getTitle())
+                        .thumb(post.getThumb())
+                        .likedCount(post.getLikedCount())
+                        .commentCount(post.getCommentCount())
+                        .createdDateTime(post.getCreatedDate().toString())
+                        .build())
+                .toList();
+
+        // PageResponse 생성
+        PageResponse<PostListRes> pageResponse = PageResponse.<PostListRes>builder()
+                .totalPage(postPage.getTotalPages())
+                .pageSize(postPage.getSize())
+                .totalElements(postPage.getTotalElements())
+                .contents(postListRes)
+                .build();
+
+        return SuccessResponse.of(pageResponse);
+    }
+
 }
