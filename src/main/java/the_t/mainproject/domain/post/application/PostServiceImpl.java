@@ -258,4 +258,46 @@ public class PostServiceImpl implements PostService {
         return SuccessResponse.of(pageResponse);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public SuccessResponse<PageResponse<PostListRes>> getMyLikedPost(int page, int size, String sortBy, UserDetailsImpl userDetails) {
+        // 기본 정렬 설정 (DATE_DESC)
+        Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdDate")));
+        switch (sortBy) {
+            case "DATE_DESC" -> pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdDate"))); // 공감일시 내림차순
+            case "DATE_ASC" -> pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("createdDate")));   // 공감일시 오름차순
+            case "TITLE_DESC" -> pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("post.title"))); // 게시글 제목 내림차순
+            case "TITLE_ASC" -> pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.asc("post.title")));   // 게시글 제목 오름차순
+            default -> {}
+        }
+
+        // 현재 사용자 조회
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).get();
+
+        // 사용자가 공감한 게시글을 페이징 처리하여 조회
+        Page<Liked> likedPage = likedRepository.findByMemberId(member.getId(), pageRequest);
+
+        // DTO로 변환
+        List<PostListRes> postListRes = likedPage.stream()
+                .map(liked -> PostListRes.builder()
+                        .postId(liked.getPost().getId())
+                        .title(liked.getPost().getTitle())
+                        .thumb(liked.getPost().getThumb())
+                        .likedCount(liked.getPost().getLikedCount())
+                        .commentCount(liked.getPost().getCommentCount())
+                        .createdDateTime(liked.getPost().getCreatedDate().toString()) // 공감 날짜
+                        .build())
+                .toList();
+
+        // PageResponse 생성
+        PageResponse<PostListRes> pageResponse = PageResponse.<PostListRes>builder()
+                .totalPage(likedPage.getTotalPages())
+                .pageSize(likedPage.getSize())
+                .totalElements(likedPage.getTotalElements())
+                .contents(postListRes)
+                .build();
+
+        return SuccessResponse.of(pageResponse);
+    }
+
 }

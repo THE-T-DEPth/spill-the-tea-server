@@ -19,4 +19,6 @@ public interface PostService {
     SuccessResponse<LikedCountRes> dislikePost(Long postId, UserDetailsImpl userDetails);
     SuccessResponse<PageResponse<PostListRes>> getMyPost(int page, int size, String sortBy,
                                                          UserDetailsImpl userDetails);
+    SuccessResponse<PageResponse<PostListRes>> getMyLikedPost(int page, int size, String sortBy,
+                                                         UserDetailsImpl userDetails);
 }
