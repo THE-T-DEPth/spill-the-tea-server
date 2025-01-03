@@ -31,4 +31,19 @@ public class MemberServiceImpl implements MemberService {
 
         return SuccessResponse.of(message);
     }
+
+    @Override
+    @Transactional
+    public SuccessResponse<Message> deleteProfileImage(UserDetailsImpl userDetails) {
+        Member member = memberRepository.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new BadCredentialsException("잘못된 토큰 입력입니다."));
+
+        member.updateProfileImage(null);
+
+        Message message = Message.builder()
+                .message("프로필 이미지 삭제가 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
+    }
 }

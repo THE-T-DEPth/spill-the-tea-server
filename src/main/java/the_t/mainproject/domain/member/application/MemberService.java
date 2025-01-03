@@ -7,4 +7,6 @@ import the_t.mainproject.global.security.UserDetailsImpl;
 public interface MemberService {
 
     SuccessResponse<Message> modifyProfileImage(UserDetailsImpl userDetails, String profile_image);
+
+    SuccessResponse<Message> deleteProfileImage(UserDetailsImpl userDetails);
 }
