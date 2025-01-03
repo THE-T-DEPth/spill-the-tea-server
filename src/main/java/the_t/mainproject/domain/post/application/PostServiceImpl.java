@@ -177,6 +177,21 @@ public class PostServiceImpl implements PostService {
         return SuccessResponse.of(likedCountRes);
     }
 
+    @Override
+    @Transactional
+    public SuccessResponse<LikedCountRes> dislikePost(Long postId, UserDetailsImpl userDetails) {
+        // post 찾기
+        Post post = postRepository.findById(postId)
+                .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        // 공감을 누른 적이 없다면 예외 반환
+        Member member = memberRepository.findByEmail(userDetails.getUsername()).get();
+        if (!likedRepository.existsByPostIdAndMemberId(post.getId(), member.getId())){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        } else {
+            likedRepository.deleteByPostIdAndMemberId(postId, member.getId());
+            post.subtractLiked();
+            postRepository.save(post);
+        }
         LikedCountRes likedCountRes = LikedCountRes.builder()
                 .postId(postId)
                 .likedCount(post.getLikedCount())

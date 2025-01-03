@@ -14,4 +14,5 @@ public interface PostService {
     SuccessResponse<Message> deletePost(Long postId, UserDetailsImpl userDetails);
     SuccessResponse<PostDetailRes> getPost(Long postId);
     SuccessResponse<LikedCountRes> likePost(Long postId, UserDetailsImpl userDetails);
+    SuccessResponse<LikedCountRes> dislikePost(Long postId, UserDetailsImpl userDetails);
 }

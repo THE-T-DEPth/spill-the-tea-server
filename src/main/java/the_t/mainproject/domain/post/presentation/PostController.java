@@ -61,4 +61,12 @@ public class PostController {
                                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(postService.likePost(postId, userDetails));
     }
+
+    @Operation(summary = "게시글 공감 취소")
+    @DeleteMapping("/liked/{postId}")
+    public ResponseEntity<SuccessResponse<LikedCountRes>> dislikePost(@PathVariable Long postId,
+                                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(postService.dislikePost(postId, userDetails));
+    }
+
 }
