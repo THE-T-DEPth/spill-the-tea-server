@@ -32,4 +32,13 @@ public class PostDetailRes {
 
     @Schema(type = "String", example = "1", description = "게시글 음성 유형")
     public String voiceType;
+
+    @Schema(type = "String", example = "[\"덕질\", \"실수\", \"고민\"]", description = "키워드 3개")
+    public String keywordList;
+
+    @Schema(type = "Long", example = "1", description = "작성자 ID")
+    public Long memberId;
+
+    @Schema(type = "String", example = "2024-12-31 02:21:11.821104", description = "작성일시")
+    public String createdDateTime;
 }

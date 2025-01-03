@@ -25,6 +25,9 @@ import the_t.mainproject.global.exception.ErrorCode;
 import the_t.mainproject.global.security.UserDetailsImpl;
 import the_t.mainproject.global.service.S3Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
@@ -139,6 +142,13 @@ public class PostServiceImpl implements PostService {
         // post 찾기
         Post post = postRepository.findById(postId)
                 .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        //keyword 찾기
+        List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(postId);
+        List<String> keywordList = new ArrayList<>(3);
+        for (PostKeyword postKeyword : postKeywordList) {
+            String keyword = postKeyword.getKeyword().getName();
+            keywordList.add(keyword);
+        }
         PostDetailRes postDetailRes = PostDetailRes.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -147,6 +157,9 @@ public class PostServiceImpl implements PostService {
                 .likedCount(post.getLikedCount())
                 .commentCount(post.getCommentCount())
                 .voiceType(post.getVoiceType().toString())
+                .keywordList(keywordList.toString())
+                .memberId(post.getMember().getId())
+                .createdDateTime(post.getCreatedDate().toString())
                 .build();
         return SuccessResponse.of(postDetailRes);
     }
