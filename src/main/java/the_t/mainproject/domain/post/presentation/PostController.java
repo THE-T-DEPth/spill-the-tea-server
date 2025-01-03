@@ -56,7 +56,7 @@ public class PostController {
     }
 
     @Operation(summary = "게시글 공감")
-    @PostMapping("/{postId}")
+    @PostMapping("/liked/{postId}")
     public ResponseEntity<SuccessResponse<LikedCountRes>> likePost(@PathVariable Long postId,
                                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity.ok(postService.likePost(postId, userDetails));

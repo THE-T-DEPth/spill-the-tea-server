@@ -159,16 +159,23 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
         // 이미 공감을 눌렀는지 확인
         Member member = memberRepository.findByEmail(userDetails.getUsername()).get();
-        if (likedRepository.existsByMemberId(member.getId())){
+        if (likedRepository.existsByPostIdAndMemberId(post.getId(),member.getId())){
             throw new BusinessException(ErrorCode.ALREADY_EXISTS);
+        } else {
+            Liked liked = Liked.builder()
+                    .member(member)
+                    .post(post)
+                    .build();
+            likedRepository.save(liked);
+            post.addLiked();
+            postRepository.save(post);
         }
-        Liked liked = Liked.builder()
-                .member(member)
-                .post(post)
+        LikedCountRes likedCountRes = LikedCountRes.builder()
+                .postId(postId)
+                .likedCount(post.getLikedCount())
                 .build();
-        likedRepository.save(liked);
-        post.addLiked();
-        postRepository.save(post);
+        return SuccessResponse.of(likedCountRes);
+    }
 
         LikedCountRes likedCountRes = LikedCountRes.builder()
                 .postId(postId)
