@@ -65,8 +65,13 @@ public class Post extends BaseEntity {
         this.content = content;
         this.voiceType = voiceType;
     }
-
     public void updateThumb(String thumb) {
         this.thumb = thumb;
+    }
+    public void addLiked() {
+        this.likedCount++;
+    }
+    public void subtractLiked() {
+        this.likedCount--;
     }
 }

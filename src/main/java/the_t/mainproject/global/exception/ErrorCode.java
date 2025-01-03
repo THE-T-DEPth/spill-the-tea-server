@@ -60,6 +60,9 @@ public enum ErrorCode {
     // RuntimeException으로 뭔가 잘못된 데이터가 바인딩 됨
     CONFLICT(409, "G013", "Data Integrity Violation Exception"),
 
+    // 이미 처리된 작업 또는 데이터
+    ALREADY_EXISTS(409, "G013", "An attempt was made to create an entity but the entity already exists."),
+
     // 서버가 처리 할 방법을 모르는 경우 발생
     INTERNAL_SERVER_ERROR(500, "G999", "Internal Server Error Exception"),
 
@@ -83,8 +86,11 @@ public enum ErrorCode {
 
     ILLEGAL_ARGUMENT_EXCEPTION_ERROR(400, "B997", "Illegal Argument Exception Error"),
 
-    ARRAY_INDEX_OUT_OF_BOUNDS_ERROR(400, "B996", "Array Index Out of Bounds Error")
+    ARRAY_INDEX_OUT_OF_BOUNDS_ERROR(400, "B996", "Array Index Out of Bounds Error"),
 
+    FILE_UPLOAD_FAILED(500, "B995", "S3 버킷에 파일(이미지) 업로드를 실패했습니다."),
+
+    FILE_DELETE_FAILED(500, "B994", "S3 버킷에 파일(이미지) 업로드를 실패했습니다.")
     ; // End
 
     /**
