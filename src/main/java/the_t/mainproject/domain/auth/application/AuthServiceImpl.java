@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import the_t.mainproject.domain.auth.dto.mapper.MemberAuthMapper;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
@@ -34,9 +35,12 @@ public class AuthServiceImpl implements AuthService {
     // refresh token to Redis
     private static String RT_PREFIX = "RT_";
 
-    private final MemberRepository memberRepository;
-    private final AuthenticationManager authenticationManager;
     private final RedisUtil redisUtil;
+    private final AuthenticationManager authenticationManager;
+    private final MemberAuthMapper memberAuthMapper;
+
+    private final MemberRepository memberRepository;
+
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
@@ -54,13 +58,7 @@ public class AuthServiceImpl implements AuthService {
             throw new IllegalArgumentException("이미 사용중인 닉네임입니다.");
         }
 
-        Member member = Member.builder()
-                .email(email)
-                .name(joinReq.getName())
-                .password(passwordEncoder.encode(joinReq.getPassword()))
-                .nickname(nickname)
-                .build();
-
+        Member member = memberAuthMapper.joinToMember(joinReq);
         memberRepository.save(member);
 
         Message message = Message.builder()
