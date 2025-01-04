@@ -26,4 +26,6 @@ public interface JwtTokenProvider {
     void setRefreshTokenHeader(HttpServletResponse response, String refreshToken);
 
     boolean isTokenValid(String token);
+
+    boolean isTokenInBlackList(String accessToken);
 }

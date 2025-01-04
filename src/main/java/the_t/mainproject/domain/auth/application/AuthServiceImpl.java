@@ -1,6 +1,8 @@
 package the_t.mainproject.domain.auth.application;
 
+import com.auth0.jwt.JWT;
 import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import the_t.mainproject.domain.auth.dto.mapper.MemberAuthMapper;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
+import the_t.mainproject.domain.auth.dto.request.LogoutReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
@@ -22,8 +25,12 @@ import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
+import the_t.mainproject.global.security.UserDetailsImpl;
 import the_t.mainproject.global.security.jwt.JwtTokenProvider;
 import the_t.mainproject.infrastructure.redis.RedisUtil;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -34,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
     private long refreshTokenValidityInSecond;
     // refresh token to Redis
     private static String RT_PREFIX = "RT_";
+    private static String BL_AT_PREFIX = "BL_AT_";
 
     private final RedisUtil redisUtil;
     private final AuthenticationManager authenticationManager;
@@ -89,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일의 유저를 찾을 수 없습니다: " + email));
 
         // refreshToken 발급
-        redisUtil.setDataExpire(RT_PREFIX + email, refreshToken, refreshTokenValidityInSecond);
+        redisUtil.setDataExpire(RT_PREFIX + refreshToken, email, refreshTokenValidityInSecond);
 
         LoginRes loginRes = LoginRes.builder()
                 .accessToken(accessToken)
@@ -97,6 +105,31 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         return SuccessResponse.of(loginRes);
+    }
+
+    @Override
+    public SuccessResponse<Message> logout(UserDetailsImpl userDetails, LogoutReq logoutReq) {
+        String email = userDetails.getMember().getEmail();
+        String findEmail = redisUtil.getData(RT_PREFIX + logoutReq.getRefreshToken());
+        if(!email.equals(findEmail))
+            throw new IllegalArgumentException("본인의 리프레시 토큰만 삭제할 수 있습니다.");
+        redisUtil.deleteData(RT_PREFIX + logoutReq.getRefreshToken());
+
+        // 남은 시간 초단위 계산
+        DecodedJWT decodedJWT = JWT.decode(logoutReq.getAccessToken());
+        Instant expiresAt = decodedJWT.getExpiresAt().toInstant();
+        Instant now = Instant.now();
+        long between = ChronoUnit.SECONDS.between(now, expiresAt);
+        System.out.println("남은 시간: " + between);
+
+        // 남은 만료시간만큼 access token blacklist
+        redisUtil.setDataExpire(BL_AT_PREFIX + logoutReq.getAccessToken(), "black list token", between);
+
+        Message message = Message.builder()
+                .message("로그아웃이 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
     }
 
     @Override

@@ -38,6 +38,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private void checkAccessTokenAndAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         jwtTokenProvider.extractAccessToken(request)
                 .filter(jwtTokenProvider::isTokenValid)
+                .filter(accessToken -> !jwtTokenProvider.isTokenInBlackList(accessToken))
                 .ifPresent(accessToken -> jwtTokenProvider.extractEmail(accessToken)
                         .ifPresent(email -> memberRepository.findByEmail(email)
                                 .ifPresent(member -> saveAuthentication(member)

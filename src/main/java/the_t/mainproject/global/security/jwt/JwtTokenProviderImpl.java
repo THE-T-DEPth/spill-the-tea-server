@@ -44,6 +44,8 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     @Value("${jwt.refresh.header}")
     private String refreshHeader;
 
+    private static final String BL_AT_PREFIX = "BL_AT_";
+
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String USERNAME_CLAIM = "email";
@@ -144,5 +146,12 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
             log.error("유효하지 않은 Token입니다", e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public boolean isTokenInBlackList(String accessToken) {
+        // Redis에서 블랙리스트로 저장된 토큰 확인
+        String blacklistToken = redisUtil.getData(BL_AT_PREFIX + accessToken);
+        return blacklistToken != null;
     }
 }
