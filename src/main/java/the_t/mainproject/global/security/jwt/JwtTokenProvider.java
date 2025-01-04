@@ -11,10 +11,6 @@ public interface JwtTokenProvider {
 
     String createRefreshToken();
 
-    void updateRefreshToken(String email, String refreshToken);
-
-    void destroyRefreshToken(String email);
-
     void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken);
 
     void sendAccessToken(HttpServletResponse response, String accessToken);

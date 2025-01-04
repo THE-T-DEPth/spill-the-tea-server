@@ -14,12 +14,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import the_t.mainproject.domain.auth.domain.repository.RefreshTokenRepository;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.global.security.AuthenticationEntryPointImpl;
 import the_t.mainproject.global.security.UserDetailsServiceImpl;
 import the_t.mainproject.global.security.filter.JwtAuthenticationProcessingFilter;
 import the_t.mainproject.global.security.jwt.JwtTokenProvider;
+import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -29,7 +29,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisUtil redisUtil;
 
     private final String[] WHITE_LIST = {
             "/v3/api-docs/**",
@@ -78,6 +78,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-        return new JwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository, refreshTokenRepository);
+        return new JwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository, redisUtil);
     }
 }

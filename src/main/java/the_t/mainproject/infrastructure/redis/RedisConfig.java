@@ -22,10 +22,10 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
+//        return new LettuceConnectionFactory(host, port);
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
         config.setPassword(password);
         return new LettuceConnectionFactory(config);
-//        return new LettuceConnectionFactory(host, port);
     }
 
     @Bean

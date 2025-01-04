@@ -1,6 +1,8 @@
 package the_t.mainproject.domain.auth.application;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -9,13 +11,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import the_t.mainproject.domain.auth.domain.RefreshToken;
-import the_t.mainproject.domain.auth.domain.repository.RefreshTokenRepository;
 import the_t.mainproject.domain.auth.dto.request.JoinReq;
 import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
+import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.global.common.Message;
@@ -28,11 +29,15 @@ import the_t.mainproject.infrastructure.redis.RedisUtil;
 @Service
 public class AuthServiceImpl implements AuthService {
 
+    @Value("${jwt.refresh.expiration}")
+    private long refreshTokenValidityInSecond;
+    // refresh token to Redis
+    private static String RT_PREFIX = "RT_";
+
     private final MemberRepository memberRepository;
     private final AuthenticationManager authenticationManager;
     private final RedisUtil redisUtil;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -86,22 +91,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일의 유저를 찾을 수 없습니다: " + email));
 
         // refreshToken 발급
-        refreshTokenRepository.findByEmail(email)
-                .ifPresentOrElse(
-                        findRefreshToken -> findRefreshToken.updateRefreshToken(refreshToken),
-                        () -> refreshTokenRepository.save(
-                                RefreshToken.builder()
-                                        .email(email)
-                                        .refreshToken(refreshToken)
-                                        .build()
-                        )
-                );
-
-        refreshTokenRepository.save(RefreshToken.builder()
-                .email(loginReq.getEmail())
-                .refreshToken(refreshToken)
-                .build()
-        );
+        redisUtil.setDataExpire(RT_PREFIX + email, refreshToken, refreshTokenValidityInSecond);
 
         LoginRes loginRes = LoginRes.builder()
                 .accessToken(accessToken)
