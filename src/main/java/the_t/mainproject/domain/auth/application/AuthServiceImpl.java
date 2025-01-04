@@ -102,6 +102,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public SuccessResponse<ReissueRes> reissue(String refreshToken) {
+        if(!jwtTokenProvider.isTokenValid(refreshToken))
+            throw new TokenExpiredException("유효하지 않은 리프레시 토큰입니다.");
+
+        String email = redisUtil.getData(RT_PREFIX + refreshToken);
+        String accessToken = jwtTokenProvider.createAccessToken(email);
+
+        ReissueRes reissueRes = ReissueRes.builder()
+                .accessToken(accessToken)
+                .build();
+
+        return SuccessResponse.of(reissueRes);
+    }
+
+    @Override
     public SuccessResponse<DuplicateCheckRes> checkEmailDuplicate(String email) {
         DuplicateCheckRes emailDuplicateCheckRes = DuplicateCheckRes.builder()
                 .availability(!memberRepository.existsByEmail(email))

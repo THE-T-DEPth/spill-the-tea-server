@@ -12,6 +12,7 @@ import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
+import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 
@@ -34,6 +35,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<SuccessResponse<LoginRes>> login(@Valid @RequestBody LoginReq loginReq) {
         return ResponseEntity.ok(authService.login(loginReq));
+    }
+
+    @Operation(summary = "access token 재발급")
+    @GetMapping(value = "/reissue")
+    public ResponseEntity<SuccessResponse<ReissueRes>> reissue(@RequestParam(value = "refreshToken") String refreshToken) {
+        return ResponseEntity.ok(authService.reissue(refreshToken));
     }
 
     @Operation(summary = "이메일 중복체크")

@@ -5,6 +5,7 @@ import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
+import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 
@@ -13,6 +14,8 @@ public interface AuthService {
     SuccessResponse<Message> join(JoinReq joinReq);
 
     SuccessResponse<LoginRes> login(LoginReq loginReq);
+
+    SuccessResponse<ReissueRes> reissue(String refreshToken);
 
     SuccessResponse<DuplicateCheckRes> checkEmailDuplicate(String email);
 
