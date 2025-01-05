@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
@@ -143,7 +144,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public SuccessResponse<PostDetailRes> getPost(Long postId) {
         // post 찾기
         Post post = postRepository.findById(postId)
@@ -219,7 +219,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public SuccessResponse<PageResponse<PostListRes>> getMyPost(int page, int size, String sortBy,
                                                                 UserDetailsImpl userDetails) {
         //dafault 설정(DATE_DESC)으로 초기화
@@ -259,7 +258,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public SuccessResponse<PageResponse<PostListRes>> getMyLikedPost(int page, int size, String sortBy, UserDetailsImpl userDetails) {
         // 기본 정렬 설정 (DATE_DESC)
         Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdDate")));
