@@ -2,6 +2,7 @@ package the_t.mainproject.global.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
@@ -9,12 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import the_t.mainproject.domain.auth.domain.repository.RefreshTokenRepository;
-import the_t.mainproject.domain.auth.exception.RefreshTokenNotFoundException;
-import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -27,6 +25,8 @@ import java.util.Optional;
 @Setter(value = AccessLevel.PRIVATE)
 @Slf4j
 public class JwtTokenProviderImpl implements JwtTokenProvider {
+
+    private final RedisUtil redisUtil;
 
     // jwt.yml 설정 값 불러옴
     @Value("${jwt.secret}")
@@ -44,15 +44,14 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     @Value("${jwt.refresh.header}")
     private String refreshHeader;
 
+    private static final String BL_AT_PREFIX = "BL_AT_";
+
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String USERNAME_CLAIM = "email";
     private static final String USERID_CLAIM = "id";
     private static final String USER_ROLE_CLAIM = "role";
     private static final String BEARER = "Bearer ";
-
-    private final MemberRepository memberRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     // 메서드
     @Override
@@ -72,30 +71,6 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
                 .withSubject(REFRESH_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(System.currentTimeMillis() + refreshTokenValidityInSeconds * 1000))
                 .sign(Algorithm.HMAC512(secret));
-    }
-
-    @Override
-    public void updateRefreshToken(String email, String refreshToken) {
-        memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다: " + email));
-
-        refreshTokenRepository.findByRefreshToken(refreshToken)
-                .ifPresentOrElse(
-                        findRefreshToken -> findRefreshToken.updateRefreshToken(refreshToken),
-                        () -> new RefreshTokenNotFoundException("해당 토큰을 찾을 수 없습니다: " + refreshToken)
-                );
-    }
-
-    @Override
-    public void destroyRefreshToken(String email) {
-        memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일로 유저를 찾을 수 없습니다: " + email));
-
-        refreshTokenRepository.findByEmail(email)
-                .ifPresentOrElse(
-                        refreshTokenRepository::delete,
-                        () -> new RefreshTokenNotFoundException("해당 이메일로 토큰을 찾을 수 없습니다: " + email)
-                );
     }
 
     @Override
@@ -164,9 +139,19 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
         try {
             JWT.require(Algorithm.HMAC512(secret)).build().verify(token);
             return true;
+        } catch (TokenExpiredException ex) {
+            log.error("만료된 JWT 토큰입니다.");
+            return false;
         } catch (Exception e) {
             log.error("유효하지 않은 Token입니다", e.getMessage());
             return false;
         }
+    }
+
+    @Override
+    public boolean isTokenInBlackList(String accessToken) {
+        // Redis에서 블랙리스트로 저장된 토큰 확인
+        String blacklistToken = redisUtil.getData(BL_AT_PREFIX + accessToken);
+        return blacklistToken != null;
     }
 }
