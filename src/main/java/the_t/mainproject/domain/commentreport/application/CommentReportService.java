@@ -1,0 +1,43 @@
+package the_t.mainproject.domain.commentreport.application;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import the_t.mainproject.domain.comment.domain.Comment;
+import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
+import the_t.mainproject.domain.commentreport.domain.CommentReport;
+import the_t.mainproject.domain.member.domain.Member;
+import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.global.common.Message;
+import the_t.mainproject.global.common.SuccessResponse;
+import the_t.mainproject.global.security.UserDetailsImpl;
+
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Service
+public class CommentReportService {
+
+    private final MemberRepository memberRepository;
+    private final CommentRepository commentRepository;
+
+    @Transactional
+    public SuccessResponse<Message> reportComment(UserDetailsImpl userDetails, Long commentId) {
+        Member member = memberRepository.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 댓글을 찾을 수 없습니다."));
+
+        CommentReport commentReport = CommentReport.builder()
+                .comment(comment)
+                .member(member)
+                .build();
+
+        comment.addReportedCount();
+
+        Message message = Message.builder()
+                .message("댓글 신고가 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
+    }
+}
