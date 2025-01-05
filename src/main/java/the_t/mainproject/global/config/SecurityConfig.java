@@ -39,7 +39,8 @@ public class SecurityConfig {
             "/test",
             "/post/**",
             "/mails/**",
-            "/members/**"
+            "/members/**",
+            "/comments/**"
     };
 
     @Bean
