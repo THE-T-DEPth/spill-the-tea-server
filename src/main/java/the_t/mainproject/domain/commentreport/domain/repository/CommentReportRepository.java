@@ -5,4 +5,5 @@ import the_t.mainproject.domain.commentreport.domain.CommentReport;
 
 public interface CommentReportRepository extends JpaRepository<CommentReport, Long> {
 
+    void deleteAllByCommentId(Long commentId);
 }
