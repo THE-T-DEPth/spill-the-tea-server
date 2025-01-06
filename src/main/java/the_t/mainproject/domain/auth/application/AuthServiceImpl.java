@@ -21,16 +21,28 @@ import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.auth.dto.response.ReissueRes;
+import the_t.mainproject.domain.block.domain.Block;
+import the_t.mainproject.domain.block.domain.repository.BlockRepository;
+import the_t.mainproject.domain.comment.domain.Comment;
+import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
+import the_t.mainproject.domain.liked.domain.Liked;
+import the_t.mainproject.domain.liked.domain.repository.LikedRepository;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.domain.post.domain.Post;
+import the_t.mainproject.domain.post.domain.repository.PostRepository;
+import the_t.mainproject.domain.postkeyword.PostKeyword;
+import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
 import the_t.mainproject.global.security.jwt.JwtTokenProvider;
+import the_t.mainproject.global.service.S3Service;
 import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,6 +60,12 @@ public class AuthServiceImpl implements AuthService {
     private final MemberAuthMapper memberAuthMapper;
 
     private final MemberRepository memberRepository;
+    private final BlockRepository blockRepository;
+    private final LikedRepository likedRepository;
+    private final CommentRepository commentRepository;
+    private final PostRepository postRepository;
+    private final PostKeywordRepository postKeywordRepository;
+    private final S3Service s3Service;
 
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -127,6 +145,68 @@ public class AuthServiceImpl implements AuthService {
 
         Message message = Message.builder()
                 .message("로그아웃이 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponse<Message> exit(UserDetailsImpl userDetails) {
+        Member member = memberRepository.findById(userDetails.getMember().getId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        // 사용자 차단 내역 삭제
+        List<Block> blockerList = blockRepository.findAllByBlocker(member);
+        List<Block> blockedList = blockRepository.findAllByBlocked(member);
+        blockRepository.deleteAll(blockerList);
+        blockRepository.deleteAll(blockedList);
+
+        // 공감한 글 삭제
+        List<Liked> likedList = likedRepository.findAllByMember(member);
+        for(Liked liked: likedList) {
+            Post post = liked.getPost();
+            if(post.getMember().equals(member))
+                continue;
+            post.subtractLiked();
+        }
+        likedRepository.deleteAll(likedList);
+
+        // 작성한 댓글 삭제
+        List<Comment> commentList = commentRepository.findAllByMember(member);
+        for(Comment comment: commentList) {
+            Post post = comment.getPost();
+            if(comment.getParentComment() == null) {
+                List<Comment> childCommentList = commentRepository.findByParentComment(comment);
+                commentRepository.deleteAll(childCommentList);
+            }
+            post.subtractCommentCount();
+        }
+        commentRepository.deleteAll(commentList);
+
+        // 작성한 게시글 삭제
+        List<Post> postList = postRepository.findByMember(member);
+        for(Post post: postList) {
+            if(post.getThumb() != null && !post.getThumb().isEmpty()) {
+                s3Service.deleteImage(post.getThumb());
+            }
+            postKeywordRepository.deleteAllByPostId(post.getId());
+
+            List<Comment> postCommentList = commentRepository.findByPost(post);
+            for(Comment comment: postCommentList) {
+                if(comment.getParentComment() == null) {
+                    List<Comment> childCommentList = commentRepository.findByParentComment(comment);
+                    commentRepository.deleteAll(childCommentList);
+                }
+            }
+            commentRepository.deleteAll(postCommentList);
+        }
+        postRepository.deleteAll(postList);
+
+        memberRepository.delete(member);
+
+        Message message = Message.builder()
+                .message("회원 탈퇴가 완료되었습니다.")
                 .build();
 
         return SuccessResponse.of(message);
