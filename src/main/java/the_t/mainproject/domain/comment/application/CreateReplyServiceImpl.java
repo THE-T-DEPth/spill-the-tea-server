@@ -47,6 +47,7 @@ public class CreateReplyServiceImpl implements CreateCommentService{
                 .build();
 
         commentRepository.save(reply);
+        post.addCommentCount();
 
         Message message = Message.builder()
                 .message("대댓글 생성이 완료되었습니다.")
