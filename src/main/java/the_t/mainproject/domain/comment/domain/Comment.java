@@ -50,11 +50,20 @@ public class Comment extends BaseEntity {
     }
 
     @Builder(builderMethodName = "ReplyBuilder", builderClassName = "ReplyBuilder")
-    public Comment(Comment parentComment, Member member, String content) {
+    public Comment(Comment parentComment, Post post, Member member, String content) {
         this.parentComment = parentComment;
+        this.post = post;
         this.member = member;
         this.content = content;
         this.likedCount = 0;
         this.reportedCount = 0;
+    }
+
+    public void addLikedCount() {
+        this.likedCount++;
+    }
+
+    public void addReportedCount() {
+        this.reportedCount++;
     }
 }
