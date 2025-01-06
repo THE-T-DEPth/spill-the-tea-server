@@ -82,6 +82,10 @@ public class Post extends BaseEntity {
         this.commentCount++;
     }
 
+    public void subtractCommentCount() {
+        this.commentCount--;
+    }
+
     public void addReportedCount() {
         this.reportedCount++;
     }
