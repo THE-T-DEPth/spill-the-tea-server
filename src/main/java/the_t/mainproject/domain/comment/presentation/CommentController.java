@@ -11,9 +11,12 @@ import the_t.mainproject.domain.comment.application.CommentService;
 import the_t.mainproject.domain.comment.application.CreateCommentService;
 import the_t.mainproject.domain.comment.application.CreateCommentServiceFactory;
 import the_t.mainproject.domain.comment.dto.request.CreateCommentReq;
+import the_t.mainproject.domain.comment.dto.response.CommentListRes;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -31,6 +34,12 @@ public class CommentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(createCommentService.createComment(userDetails, createCommentReq));
+    }
+
+    @Operation(summary = "댓글 목록")
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<SuccessResponse<List<CommentListRes>>> getComments(@PathVariable(value = "postId") Long postId) {
+        return ResponseEntity.ok(commentService.getCommentList(postId));
     }
 
     @Operation(summary = "댓글 공감")
