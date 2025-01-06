@@ -47,6 +47,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.logout(userDetails, logoutReq));
     }
 
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping(value = "/exit")
+    public ResponseEntity<SuccessResponse<Message>> exit(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity.ok(authService.exit(userDetails));
+    }
+
     @Operation(summary = "access token 재발급")
     @GetMapping(value = "/reissue")
     public ResponseEntity<SuccessResponse<ReissueRes>> reissue(@RequestParam(value = "refreshToken") String refreshToken) {
