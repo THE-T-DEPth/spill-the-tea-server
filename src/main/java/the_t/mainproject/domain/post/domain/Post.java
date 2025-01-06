@@ -78,6 +78,10 @@ public class Post extends BaseEntity {
         this.likedCount--;
     }
 
+    public void addCommentCount() {
+        this.commentCount++;
+    }
+
     public void addReportedCount() {
         this.reportedCount++;
     }
