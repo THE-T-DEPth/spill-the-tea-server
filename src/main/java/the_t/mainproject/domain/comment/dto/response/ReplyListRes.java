@@ -24,6 +24,9 @@ public class ReplyListRes {
     @Schema(type = "String", example = "댓글 작성자 닉네임", description = "대댓글 작성자의 닉네임을 표시합니다.")
     private String nickname;
 
+    @Schema(type = "String", example = "**댓글 내용**", description = "대댓글 내용을 표시합니다.")
+    private String content;
+
     @Schema(type = "LocalTime", example = "12:25", description = "대댓글 생성된 시간을 표시합니다.")
     @JsonFormat(pattern = "HH:mm", shape = JsonFormat.Shape.STRING, timezone = "Asia/Seoul")
     private LocalTime createTime;
@@ -32,6 +35,6 @@ public class ReplyListRes {
     @JsonFormat(pattern = "yy.MM.dd", shape = JsonFormat.Shape.STRING, timezone = "Asia/Seoul")
     private LocalDate createDate;
 
-    @Schema(type = "String", example = "**댓글 내용**", description = "대댓글 내용을 표시합니다.")
-    private String content;
+    @Schema(type = "Integer", example = "1", description = "대댓글 공감 수를 표시합니다.")
+    private Integer likedCount;
 }
