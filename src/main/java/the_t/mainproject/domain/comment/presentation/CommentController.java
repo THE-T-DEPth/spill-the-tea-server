@@ -6,10 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import the_t.mainproject.domain.comment.application.CommentService;
 import the_t.mainproject.domain.comment.application.CreateCommentService;
 import the_t.mainproject.domain.comment.application.CreateCommentServiceFactory;
 import the_t.mainproject.domain.comment.dto.request.CreateCommentReq;
@@ -23,6 +21,7 @@ import the_t.mainproject.global.security.UserDetailsImpl;
 public class CommentController {
 
     private final CreateCommentServiceFactory createCommentServiceFactory;
+    private final CommentService commentService;
 
     @Operation(summary = "새로운 댓글 작성")
     @PostMapping
@@ -32,5 +31,11 @@ public class CommentController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(createCommentService.createComment(userDetails, createCommentReq));
+    }
+
+    @Operation(summary = "댓글 공감")
+    @PostMapping("/liked/{commentId}")
+    public ResponseEntity<SuccessResponse<Message>> likedComment(@PathVariable(value = "commentId") Long commentId) {
+        return ResponseEntity.ok(commentService.likeComment(commentId));
     }
 }

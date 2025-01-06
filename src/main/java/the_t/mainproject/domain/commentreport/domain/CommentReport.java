@@ -1,4 +1,4 @@
-package the_t.mainproject.domain.commentreport;
+package the_t.mainproject.domain.commentreport.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
