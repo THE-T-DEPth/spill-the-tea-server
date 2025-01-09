@@ -31,7 +31,11 @@ public class CommentService {
         List<Comment> replyList = commentRepository.findByPostAndParentCommentIsNotNull(post);
 
         // 1. 공감순 상위 3개 댓글 추출
-        List<Comment> topLikedCommentList = commentList.stream()
+        List<Comment> allComments = new ArrayList<>();
+        allComments.addAll(commentList);
+        allComments.addAll(replyList);
+
+        List<Comment> topLikedCommentList = allComments.stream()
                 .sorted((c1, c2) -> Integer.compare(c2.getLikedCount(), c1.getLikedCount()))
                 .limit(3)
                 .toList();
@@ -42,12 +46,31 @@ public class CommentService {
         List<CommentListRes> commentDetails = new ArrayList<>();
 
         for(Comment comment : topLikedCommentList) {
-            CommentListRes commentListRes = mappingCommentListRes(comment);
+            CommentListRes commentListRes = CommentListRes.builder()
+                    .commentId(comment.getId())
+                    .profileImage(comment.getMember().getProfileImage())
+                    .nickname(comment.getMember().getNickname())
+                    .content(comment.getContent())
+                    .createTime(comment.getCreatedDate().toLocalTime())
+                    .createDate(comment.getCreatedDate().toLocalDate())
+                    .likedCount(comment.getLikedCount())
+                    .build();
+
             commentDetails.add(commentListRes);
         }
 
         for(Comment comment : sortedCommentList) {
-            CommentListRes commentListRes = mappingCommentListRes(comment);
+            CommentListRes commentListRes = CommentListRes.builder()
+                    .commentId(comment.getId())
+                    .profileImage(comment.getMember().getProfileImage())
+                    .nickname(comment.getMember().getNickname())
+                    .content(comment.getContent())
+                    .createTime(comment.getCreatedDate().toLocalTime())
+                    .createDate(comment.getCreatedDate().toLocalDate())
+                    .likedCount(comment.getLikedCount())
+                    .replyList(new ArrayList<>())
+                    .build();
+
             commentDetails.add(commentListRes);
         }
 
@@ -65,23 +88,13 @@ public class CommentService {
 
             commentDetails.stream()
                     .filter(parentComment -> parentComment.getCommentId().equals(reply.getParentComment().getId()))
-                    .forEach(parentComment -> parentComment.getReplyList().add(replyListRes));
+                    .forEach(parentComment -> {
+                        if(parentComment.getReplyList() != null)
+                            parentComment.getReplyList().add(replyListRes);
+                    });
         }
 
         return SuccessResponse.of(commentDetails);
-    }
-
-    private CommentListRes mappingCommentListRes(Comment comment) {
-        return CommentListRes.builder()
-                .commentId(comment.getId())
-                .profileImage(comment.getMember().getProfileImage())
-                .nickname(comment.getMember().getNickname())
-                .content(comment.getContent())
-                .createTime(comment.getCreatedDate().toLocalTime())
-                .createDate(comment.getCreatedDate().toLocalDate())
-                .likedCount(comment.getLikedCount())
-                .replyList(new ArrayList<>())
-                .build();
     }
 
     @Transactional
