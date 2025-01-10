@@ -298,4 +298,31 @@ public class PostServiceImpl implements PostService {
         return SuccessResponse.of(pageResponse);
     }
 
+    @Override
+    public SuccessResponse<PageResponse<PostListRes>> getWordSearchedPost(int page, int size, String word) {
+        Pageable pageRequest = PageRequest.of(page, size);
+        Page<Post> postPage = postRepository.findByWord(word, pageRequest);
+
+        // DTO로 변환
+        List<PostListRes> postListRes = postPage.stream()
+                .map(post -> PostListRes.builder()
+                        .postId(post.getId())
+                        .title(post.getTitle())
+                        .thumb(post.getThumb())
+                        .likedCount(post.getLikedCount())
+                        .commentCount(post.getCommentCount())
+                        .createdDateTime(post.getCreatedDate().toString())
+                        .build())
+                .toList();
+
+        // PageResponse 생성
+        PageResponse<PostListRes> pageResponse = PageResponse.<PostListRes>builder()
+                .totalPage(postPage.getTotalPages())
+                .pageSize(postPage.getSize())
+                .totalElements(postPage.getTotalElements())
+                .contents(postListRes)
+                .build();
+
+        return SuccessResponse.of(pageResponse);
+    }
 }
