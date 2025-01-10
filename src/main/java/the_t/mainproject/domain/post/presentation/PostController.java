@@ -107,7 +107,6 @@ public class PostController {
     @Operation(summary = "단어로 게시글 검색 (페이지네이션)")
     @GetMapping("/search/word")
     public ResponseEntity<SuccessResponse<PageResponse<PostListRes>>> getWordSearchedPost(
-//    public ResponseEntity<SuccessResponse<PageResponse<PostListScoreRes>>> getWordSearchedPost(
             @Parameter(description = "현재 페이지의 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "한 페이지의 개수") @RequestParam(defaultValue = "15") int size,
             @Parameter(description = "검색 키워드") String word) {
