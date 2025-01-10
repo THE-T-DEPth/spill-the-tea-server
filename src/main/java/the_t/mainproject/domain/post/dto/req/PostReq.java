@@ -14,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Getter
 public class PostReq {
-    private final String voiceTypeList = Arrays.toString(VoiceType.values());
 
     @NotBlank(message = "제목을 입력해주세요")
     @Size(min = 1, max = 12, message = "제목은 최소 1자부터 최대 12자까지 가능합니다")
@@ -32,20 +31,10 @@ public class PostReq {
     private List<String> keyword;
 
     @NotBlank(message = "음성 유형을 입력해주세요")
-    @Schema(type = "String", example = "", description = """
+    @Schema(type = "String", example = "ko_KR_Standard_A", description = """
             음성 유형. 아래 유형 중 하나를 작성해주세요. 음성 변환 기능을 이용하지 않을 경우 none으로 입력하면 됩니다.
-            none,
-            ko_KR_Neural2_A,
-            ko_KR_Neural2_B,
-            ko_KR_Neural2_C,
-            ko_KR_Standard_A,
-            ko_KR_Standard_B,
-            ko_KR_Standard_C,
-            ko_KR_Standard_D,
-            ko_KR_Wavenet_A,
-            ko_KR_Wavenet_B,
-            ko_KR_Wavenet_C,
-            ko_KR_Wavenet_D""")
+            none, ko_KR_Standard_A, ko_KR_Standard_C
+            """)
     private String voice_type;
 
 }
