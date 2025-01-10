@@ -21,4 +21,5 @@ public interface PostService {
                                                          UserDetailsImpl userDetails);
     SuccessResponse<PageResponse<PostListRes>> getMyLikedPost(int page, int size, String sortBy,
                                                          UserDetailsImpl userDetails);
+    SuccessResponse<PageResponse<PostListRes>> getWordSearchedPost(int page, int size, String word);
 }
