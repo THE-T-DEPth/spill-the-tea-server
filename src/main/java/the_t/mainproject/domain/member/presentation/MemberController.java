@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.member.application.MemberServiceImpl;
 import the_t.mainproject.domain.member.dto.MemberUpdateReq;
 import the_t.mainproject.global.common.Message;
@@ -20,7 +21,8 @@ public class MemberController {
 
     @Operation(summary = "프로필 이미지 수정")
     @PutMapping("/image")
-    public ResponseEntity<SuccessResponse<Message>> modifyProfileImage(@AuthenticationPrincipal UserDetailsImpl member, String profile_image) {
+    public ResponseEntity<SuccessResponse<Message>> modifyProfileImage(@AuthenticationPrincipal UserDetailsImpl member,
+                                                                       @RequestPart MultipartFile profile_image) {
         return ResponseEntity.ok(memberService.modifyProfileImage(member, profile_image));
     }
 

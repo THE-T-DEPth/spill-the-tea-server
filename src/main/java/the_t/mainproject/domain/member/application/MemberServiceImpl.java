@@ -5,12 +5,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.domain.member.dto.MemberUpdateReq;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
+import the_t.mainproject.global.service.S3Service;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -19,14 +21,21 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final S3Service s3Service;
 
     @Override
     @Transactional
-    public SuccessResponse<Message> modifyProfileImage(UserDetailsImpl userDetails, String profile_image) {
+    public SuccessResponse<Message> modifyProfileImage(UserDetailsImpl userDetails, MultipartFile profile_image) {
         Member member = memberRepository.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new BadCredentialsException("잘못된 토큰 입력입니다."));
 
-        member.updateProfileImage(profile_image);
+        if(!profile_image.isEmpty()) {
+            if(member.getProfileImage() != null && !member.getProfileImage().isEmpty()) {
+                s3Service.deleteImage(member.getProfileImage());
+            }
+
+            member.updateProfileImage(s3Service.uploadImage(profile_image));
+        }
 
         Message message = Message.builder()
                 .message("프로필 이미지 설정이 변경되었습니다.")
