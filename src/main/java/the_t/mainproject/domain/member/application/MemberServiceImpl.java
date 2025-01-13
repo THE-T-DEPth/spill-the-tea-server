@@ -50,6 +50,10 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new BadCredentialsException("잘못된 토큰 입력입니다."));
 
+        if(member.getProfileImage() != null && !member.getProfileImage().isEmpty()) {
+            s3Service.deleteImage(member.getProfileImage());
+        }
+
         member.updateProfileImage(null);
 
         Message message = Message.builder()
