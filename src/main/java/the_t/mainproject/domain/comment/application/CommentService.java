@@ -31,16 +31,13 @@ public class CommentService {
         List<Comment> replyList = commentRepository.findByPostAndParentCommentIsNotNull(post);
 
         // 1. 공감순 상위 3개 댓글 추출
-        List<Comment> allComments = new ArrayList<>();
-        allComments.addAll(commentList);
-        allComments.addAll(replyList);
-
-        List<Comment> topLikedCommentList = allComments.stream()
+        List<Comment> topLikedCommentList = commentList.stream()
                 .sorted((c1, c2) -> Integer.compare(c2.getLikedCount(), c1.getLikedCount()))
                 .limit(3)
                 .toList();
         // 2. 최신 생성순 댓글 정렬
         List<Comment> sortedCommentList = commentList.stream()
+                .filter(comment -> !topLikedCommentList.contains(comment))
                 .sorted((c1, c2) -> c2.getCreatedDate().compareTo(c1.getCreatedDate()))
                 .toList();
         List<CommentListRes> commentDetails = new ArrayList<>();
