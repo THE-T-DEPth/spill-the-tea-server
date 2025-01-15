@@ -245,14 +245,23 @@ public class PostServiceImpl implements PostService {
 
         // DTO로 변환
         List<PostListRes> postListRes = postPage.stream()
-                .map(post -> PostListRes.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .thumb(post.getThumb())
-                        .likedCount(post.getLikedCount())
-                        .commentCount(post.getCommentCount())
-                        .createdDateTime(post.getCreatedDate().toString())
-                        .build())
+                .map(post -> {
+                    // 키워드 리스트 생성
+                    List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(post.getId());
+                    List<String> keywordList = postKeywordList.stream()
+                            .map(postKeyword -> postKeyword.getKeyword().getName())
+                            .toList();
+
+                    return PostListRes.builder()
+                            .postId(post.getId())
+                            .title(post.getTitle())
+                            .thumb(post.getThumb())
+                            .likedCount(post.getLikedCount())
+                            .commentCount(post.getCommentCount())
+                            .keywordList(keywordList.toString())
+                            .createdDateTime(post.getCreatedDate().toString())
+                            .build();
+                })
                 .toList();
 
         // PageResponse 생성
@@ -286,15 +295,25 @@ public class PostServiceImpl implements PostService {
 
         // DTO로 변환
         List<PostListRes> postListRes = likedPage.stream()
-                .map(liked -> PostListRes.builder()
-                        .postId(liked.getPost().getId())
-                        .title(liked.getPost().getTitle())
-                        .thumb(liked.getPost().getThumb())
-                        .likedCount(liked.getPost().getLikedCount())
-                        .commentCount(liked.getPost().getCommentCount())
-                        .createdDateTime(liked.getPost().getCreatedDate().toString()) // 공감 날짜
-                        .build())
+                .map(liked -> {
+                    // 키워드 리스트 생성
+                    List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(liked.getPost().getId());
+                    List<String> keywordList = postKeywordList.stream()
+                            .map(postKeyword -> postKeyword.getKeyword().getName())
+                            .toList();
+
+                    return PostListRes.builder()
+                            .postId(liked.getPost().getId())
+                            .title(liked.getPost().getTitle())
+                            .thumb(liked.getPost().getThumb())
+                            .likedCount(liked.getPost().getLikedCount())
+                            .commentCount(liked.getPost().getCommentCount())
+                            .keywordList(keywordList.toString())
+                            .createdDateTime(liked.getPost().getCreatedDate().toString()) // 공감 날짜
+                            .build();
+                })
                 .toList();
+
 
         // PageResponse 생성
         PageResponse<PostListRes> pageResponse = PageResponse.<PostListRes>builder()
@@ -314,14 +333,23 @@ public class PostServiceImpl implements PostService {
 
         // DTO로 변환
         List<PostListRes> postListRes = postPage.stream()
-                .map(post -> PostListRes.builder()
-                        .postId(post.getId())
-                        .title(post.getTitle())
-                        .thumb(post.getThumb())
-                        .likedCount(post.getLikedCount())
-                        .commentCount(post.getCommentCount())
-                        .createdDateTime(post.getCreatedDate().toString())
-                        .build())
+                .map(post -> {
+                    // 키워드 리스트 생성
+                    List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(post.getId());
+                    List<String> keywordList = postKeywordList.stream()
+                            .map(postKeyword -> postKeyword.getKeyword().getName())
+                            .toList();
+
+                    return PostListRes.builder()
+                            .postId(post.getId())
+                            .title(post.getTitle())
+                            .thumb(post.getThumb())
+                            .likedCount(post.getLikedCount())
+                            .commentCount(post.getCommentCount())
+                            .keywordList(keywordList.toString())
+                            .createdDateTime(post.getCreatedDate().toString())
+                            .build();
+                })
                 .toList();
 
         // PageResponse 생성
