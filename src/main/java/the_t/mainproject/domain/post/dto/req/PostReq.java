@@ -6,9 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import the_t.mainproject.domain.post.domain.VoiceType;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
