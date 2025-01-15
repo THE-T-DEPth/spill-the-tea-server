@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
 import the_t.mainproject.domain.keyword.domain.Keyword;
 import the_t.mainproject.domain.keyword.domain.repository.KeywordRepository;
 import the_t.mainproject.domain.liked.domain.Liked;
@@ -44,6 +45,7 @@ public class PostServiceImpl implements PostService {
     private final KeywordRepository keywordRepository;
     private final PostKeywordRepository postKeywordRepository;
     private final LikedRepository likedRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     @Transactional
@@ -130,14 +132,21 @@ public class PostServiceImpl implements PostService {
         // post 찾기
         Post post = postRepository.findById(postId)
                 .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        // 본인이 쓴 글이 아닐 경우 예외 반환
         if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
         }
+        // 썸네일 삭제
         if (post.getThumb() != null && !post.getThumb().isEmpty()) {
             s3Service.deleteImage(post.getThumb());
         }
+        // PostKeyword, post 삭제
         postKeywordRepository.deleteAllByPostId(postId);
         postRepository.deleteById(postId);
+
+        // 댓글, 대댓글 삭제
+        commentRepository.deleteAllByPostId(postId);
+
         return SuccessResponse.of(Message.builder()
                 .message("게시글 삭제가 완료됨")
                 .build());
