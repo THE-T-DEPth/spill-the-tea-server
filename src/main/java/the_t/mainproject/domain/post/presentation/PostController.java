@@ -19,6 +19,8 @@ import the_t.mainproject.global.common.PageResponse;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/post")
@@ -111,5 +113,14 @@ public class PostController {
             @Parameter(description = "한 페이지의 개수") @RequestParam(defaultValue = "15") int size,
             @Parameter(description = "검색 키워드") String word) {
         return ResponseEntity.ok(postService.getWordSearchedPost(page, size, word));
+    }
+
+    @Operation(summary = "키워드로 게시글 검색 (페이지네이션)")
+    @GetMapping("/search/keyword")
+    public ResponseEntity<SuccessResponse<PageResponse<PostListRes>>> getKeywordSearchedPost(
+            @Parameter(description = "현재 페이지의 번호 (0부터 시작)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "한 페이지의 개수") @RequestParam(defaultValue = "15") int size,
+            @Parameter(description = "검색 키워드 목록") @RequestParam List<String> keywords) {
+        return ResponseEntity.ok(postService.getKeywordSearchedPost(page, size, keywords));
     }
 }

@@ -362,4 +362,44 @@ public class PostServiceImpl implements PostService {
 
         return SuccessResponse.of(pageResponse);
     }
+
+    @Override
+    public SuccessResponse<PageResponse<PostListRes>> getKeywordSearchedPost(int page, int size, List<String> keywords) {
+        Pageable pageRequest = PageRequest.of(page, size);
+
+        // 검색 쿼리 실행
+        Page<Post> postPage = postRepository.findByKeywords(keywords, pageRequest);
+
+        // DTO로 변환
+        List<PostListRes> postListRes = postPage.stream()
+                .map(post -> {
+                    // 키워드 리스트 생성
+                    List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(post.getId());
+                    List<String> keywordList = postKeywordList.stream()
+                            .map(postKeyword -> postKeyword.getKeyword().getName())
+                            .toList();
+
+                    return PostListRes.builder()
+                            .postId(post.getId())
+                            .title(post.getTitle())
+                            .thumb(post.getThumb())
+                            .likedCount(post.getLikedCount())
+                            .commentCount(post.getCommentCount())
+                            .keywordList(keywordList.toString())
+                            .createdDateTime(post.getCreatedDate().toString())
+                            .build();
+                })
+                .toList();
+
+        // PageResponse 생성
+        PageResponse<PostListRes> pageResponse = PageResponse.<PostListRes>builder()
+                .totalPage(postPage.getTotalPages())
+                .pageSize(postPage.getSize())
+                .totalElements(postPage.getTotalElements())
+                .contents(postListRes)
+                .build();
+
+        return SuccessResponse.of(pageResponse);
+    }
+
 }
