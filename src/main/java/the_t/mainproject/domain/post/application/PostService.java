@@ -10,6 +10,8 @@ import the_t.mainproject.global.common.PageResponse;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
 
+import java.util.List;
+
 public interface PostService {
     SuccessResponse<Message> createPost(PostReq request, MultipartFile image, UserDetailsImpl userDetails);
     SuccessResponse<Message> updatePost(Long postId, PostReq postReq, MultipartFile image, UserDetailsImpl userDetails);
@@ -22,4 +24,5 @@ public interface PostService {
     SuccessResponse<PageResponse<PostListRes>> getMyLikedPost(int page, int size, String sortBy,
                                                          UserDetailsImpl userDetails);
     SuccessResponse<PageResponse<PostListRes>> getWordSearchedPost(int page, int size, String word);
+    SuccessResponse<PageResponse<PostListRes>> getKeywordSearchedPost(int page, int size, List<String> keywords);
 }

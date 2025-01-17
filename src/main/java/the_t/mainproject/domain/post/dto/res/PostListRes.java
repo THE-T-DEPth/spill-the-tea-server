@@ -27,6 +27,9 @@ public class PostListRes {
     @Schema(type = "Integer", example = "1", description = "게시글 댓글 개수")
     public Integer commentCount;
 
+    @Schema(type = "String", example = "[\"덕질\", \"실수\", \"고민\"]", description = "키워드 3개")
+    public String keywordList;
+
     @Schema(type = "String", example = "2024-12-31 02:21:11.821104", description = "작성일시")
     public String createdDateTime;
 }
