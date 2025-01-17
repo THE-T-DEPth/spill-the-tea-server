@@ -20,7 +20,7 @@ public class BlockController {
     @Operation(summary = "사용자 차단")
     @PostMapping("/blocked")
     public ResponseEntity<SuccessResponse<Message>> blockMember(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                @RequestParam(value = "email") String blockedEmail) {
-        return ResponseEntity.ok(blockService.blockMember(userDetails, blockedEmail));
+                                                                @RequestParam(value = "memberId") Long blockedId) {
+        return ResponseEntity.ok(blockService.blockMember(userDetails, blockedId));
     }
 }

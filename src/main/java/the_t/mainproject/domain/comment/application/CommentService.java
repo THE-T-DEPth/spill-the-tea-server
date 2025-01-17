@@ -7,6 +7,7 @@ import the_t.mainproject.domain.comment.domain.Comment;
 import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
 import the_t.mainproject.domain.comment.dto.response.CommentListRes;
 import the_t.mainproject.domain.comment.dto.response.ReplyListRes;
+import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.global.common.Message;
@@ -23,7 +24,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
 
-    public SuccessResponse<List<CommentListRes>> getCommentList(Long postId) {
+    public SuccessResponse<List<CommentListRes>> getCommentList(Long postId, Long memberId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. " + postId));
 
@@ -43,18 +44,19 @@ public class CommentService {
         List<CommentListRes> commentDetails = new ArrayList<>();
 
         for(Comment comment : topLikedCommentList) {
-            CommentListRes commentListRes = mappingCommentListRes(comment);
+            CommentListRes commentListRes = mappingCommentListRes(comment, memberId);
             commentDetails.add(commentListRes);
         }
 
         for(Comment comment : sortedCommentList) {
-            CommentListRes commentListRes = mappingCommentListRes(comment);
+            CommentListRes commentListRes = mappingCommentListRes(comment, memberId);
             commentDetails.add(commentListRes);
         }
 
         for(Comment reply : replyList) {
             ReplyListRes replyListRes = ReplyListRes.builder()
                     .commentId(reply.getId())
+                    .mine(memberId != null && memberId.equals(reply.getMember().getId()))
                     .parentCommentId(reply.getParentComment().getId())
                     .profileImage(reply.getMember().getProfileImage())
                     .nickname(reply.getMember().getNickname())
@@ -72,9 +74,10 @@ public class CommentService {
         return SuccessResponse.of(commentDetails);
     }
 
-    private CommentListRes mappingCommentListRes(Comment comment) {
+    private CommentListRes mappingCommentListRes(Comment comment, Long memberId) {
         return CommentListRes.builder()
                 .commentId(comment.getId())
+                .mine(memberId != null && memberId.equals(comment.getMember().getId()))
                 .profileImage(comment.getMember().getProfileImage())
                 .nickname(comment.getMember().getNickname())
                 .content(comment.getContent())
