@@ -19,11 +19,11 @@ public class BlockService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public SuccessResponse<Message> blockMember(UserDetailsImpl userDetails, String blockedEmail) {
-        Member blocker = memberRepository.findByEmail(userDetails.getUsername())
+    public SuccessResponse<Message> blockMember(UserDetailsImpl userDetails, Long blockedId) {
+        Member blocker = memberRepository.findById(userDetails.getMember().getId())
                 .orElseThrow(() -> new IllegalArgumentException("차단자 정보가 없습니다."));
 
-        Member blocked = memberRepository.findByEmail(blockedEmail)
+        Member blocked = memberRepository.findById(blockedId)
                 .orElseThrow(() -> new IllegalArgumentException("차단하고자 하는 멤버가 없습니다."));
 
         if(blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {

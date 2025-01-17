@@ -17,4 +17,6 @@ public interface LikedRepository extends JpaRepository<Liked, Long> {
     Page<Liked> findByMemberId(Long id, Pageable pageRequest);
 
     List<Liked> findAllByMember(Member member);
+
+    void deleteAllByPostId(Long postId);
 }

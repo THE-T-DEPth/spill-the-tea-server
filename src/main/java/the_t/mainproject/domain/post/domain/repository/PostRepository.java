@@ -3,8 +3,8 @@ package the_t.mainproject.domain.post.domain.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import the_t.mainproject.domain.member.domain.Member;
 import org.springframework.data.jpa.repository.Query;
+import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.post.domain.Post;
 
 import java.util.List;
@@ -18,4 +18,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query(value = "SELECT * FROM post WHERE MATCH(title) AGAINST(:word IN BOOLEAN MODE)", nativeQuery = true)
     Page<Post> findByWord(String word, Pageable pageRequest);
 
+    @Query(value = """
+    SELECT p.*
+    FROM post p
+    JOIN post_keyword pk ON p.id = pk.post_id
+    JOIN keyword k ON pk.keyword_id = k.id
+    WHERE k.name IN (:keywords)
+    GROUP BY p.id
+    ORDER BY COUNT(k.id) DESC
+    """, nativeQuery = true)
+    Page<Post> findByKeywords(List<String> keywords, Pageable pageable);
 }

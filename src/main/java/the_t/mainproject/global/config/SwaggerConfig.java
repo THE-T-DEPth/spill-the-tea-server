@@ -18,6 +18,6 @@ public class SwaggerConfig {
     private Info apiInfo() {
         return new Info()
                 .title("스필더티 API")
-                .version("1.0.2");
+                .version("2.1.8");
     }
 }
