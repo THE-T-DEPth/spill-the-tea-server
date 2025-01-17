@@ -140,12 +140,14 @@ public class PostServiceImpl implements PostService {
         if (post.getThumb() != null && !post.getThumb().isEmpty()) {
             s3Service.deleteImage(post.getThumb());
         }
-        // PostKeyword, post 삭제
+        // liked 삭제
+        likedRepository.deleteAllByPostId(postId);
+        // PostKeyword 삭제
         postKeywordRepository.deleteAllByPostId(postId);
-        postRepository.deleteById(postId);
-
         // 댓글, 대댓글 삭제
         commentRepository.deleteAllByPostId(postId);
+        // post 삭제
+        postRepository.deleteById(postId);
 
         return SuccessResponse.of(Message.builder()
                 .message("게시글 삭제가 완료됨")
