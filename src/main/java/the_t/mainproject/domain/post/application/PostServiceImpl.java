@@ -176,6 +176,8 @@ public class PostServiceImpl implements PostService {
                 .voiceType(post.getVoiceType().toString())
                 .keywordList(keywordList.toString())
                 .memberId(post.getMember().getId())
+                .nickname(post.getMember().getNickname())
+                .profileImage(post.getMember().getProfileImage())
                 .createdDateTime(post.getCreatedDate().toString())
                 .build();
         return SuccessResponse.of(postDetailRes);
