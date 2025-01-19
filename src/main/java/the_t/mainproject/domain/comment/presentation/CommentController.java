@@ -50,4 +50,11 @@ public class CommentController {
     public ResponseEntity<SuccessResponse<Message>> likedComment(@PathVariable(value = "commentId") Long commentId) {
         return ResponseEntity.ok(commentService.likeComment(commentId));
     }
+
+    @Operation(summary = "댓글 삭제")
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<SuccessResponse<Message>> deleteComment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                  @PathVariable(value = "commentId") Long commentId) {
+        return ResponseEntity.ok(commentService.deleteComment(userDetails.getMember().getId(), commentId));
+    }
 }
