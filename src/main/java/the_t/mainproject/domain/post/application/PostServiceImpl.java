@@ -15,10 +15,13 @@ import the_t.mainproject.domain.liked.domain.Liked;
 import the_t.mainproject.domain.liked.domain.repository.LikedRepository;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.domain.post.domain.Image;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.VoiceType;
+import the_t.mainproject.domain.post.domain.repository.ImageRepository;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.domain.post.dto.req.PostReq;
+import the_t.mainproject.domain.post.dto.res.ImageRes;
 import the_t.mainproject.domain.post.dto.res.LikedCountRes;
 import the_t.mainproject.domain.post.dto.res.PostDetailRes;
 import the_t.mainproject.domain.post.dto.res.PostListRes;
@@ -46,20 +49,51 @@ public class PostServiceImpl implements PostService {
     private final PostKeywordRepository postKeywordRepository;
     private final LikedRepository likedRepository;
     private final CommentRepository commentRepository;
+    private final ImageRepository imageRepository;
 
     @Override
     @Transactional
-    public SuccessResponse<Message> createPost(PostReq postReq, MultipartFile image,
+    public SuccessResponse<ImageRes> uploadImage(MultipartFile image, UserDetailsImpl userDetails) {
+        if (!memberRepository.existsById(userDetails.getMember().getId())){
+            throw new BusinessException(ErrorCode.UNAUTHORIZED_ERROR);
+        }
+
+        String imgUrl = s3Service.uploadImage(image); // 파일 업로드 후 url 반환
+        Image savedImage = imageRepository.save(Image.builder()
+                .post(null)
+                .url(imgUrl)
+                .thumb(false)
+                .build());
+        return SuccessResponse.of(ImageRes.builder()
+                        .id(savedImage.getId())
+                        .url(imgUrl)
+                        .build());
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponse<Message> createPost(PostReq postReq,
                                                UserDetailsImpl userDetails) {
         // post 생성 및 저장
         Post post = Post.builder()
                         .title(postReq.getTitle())
                         .content(postReq.getContent())
-                        .thumb(s3Service.uploadImage(image))
                         .voiceType(VoiceType.valueOf(postReq.getVoice_type()))
                         .member(memberRepository.findByEmail(userDetails.getUsername()).get())
                         .build();
         postRepository.save(post);
+
+        // image - post 연결
+        List<Image> imageList = new ArrayList<>();
+        for(Long imageId : postReq.getImageIdList()){
+            Image image = imageRepository.findById(imageId).get();
+            image.updatePost(post);
+            if (image.getId().equals(postReq.getThumbImageId())){
+                image.updateThumb(true);
+            }
+            imageList.add(image);
+        }
+        imageRepository.saveAll(imageList);
 
         // 키워드 저장
         postReq.getKeyword().forEach(keywordName -> {

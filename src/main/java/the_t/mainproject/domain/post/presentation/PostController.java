@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.post.application.PostService;
 import the_t.mainproject.domain.post.dto.req.PostReq;
-import the_t.mainproject.domain.post.dto.res.LikedCountRes;
-import the_t.mainproject.domain.post.dto.res.PostDetailRes;
-import the_t.mainproject.domain.post.dto.res.PostListRes;
+import the_t.mainproject.domain.post.dto.res.*;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.PageResponse;
 import the_t.mainproject.global.common.SuccessResponse;
@@ -27,15 +25,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
+    @Operation(summary = "게시글 이미지 업로드",
+            description = "게시글 등록 시 이미지를 업로드하는 API입니다. 해당 API를 이용해 이미지를 하나씩 개별적으로 업로드하고 " +
+            "반환되는 url을 html코드에 넣어주세요.")
+    @PostMapping("/image")
+    public ResponseEntity<SuccessResponse<ImageRes>> uploadImage(@RequestPart MultipartFile image,
+                                                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(postService.uploadImage(image, userDetails));
+    }
 
     @Operation(summary = "게시글 등록")
     @PostMapping("")
-    public ResponseEntity<SuccessResponse<Message>> createPost(@Valid @RequestPart PostReq postReq,
-                                                               @RequestPart(value = "image") MultipartFile image,
+    public ResponseEntity<SuccessResponse<Message>> createPost(@Valid @RequestBody PostReq postReq,
                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(postService.createPost(postReq, image, userDetails));
+                .body(postService.createPost(postReq, userDetails));
     }
 
     @Operation(summary = "게시글 수정")
