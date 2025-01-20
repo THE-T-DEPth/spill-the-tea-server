@@ -1,4 +1,4 @@
-package the_t.mainproject.domain.member.dto;
+package the_t.mainproject.domain.member.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
