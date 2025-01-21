@@ -48,10 +48,9 @@ public class PostController {
     @Operation(summary = "게시글 수정")
     @PutMapping("/{postId}")
     public ResponseEntity<SuccessResponse<Message>> updatePost(@PathVariable Long postId,
-                                                               @Valid @RequestPart PostReq postReq,
-                                                               @RequestPart(value = "image") MultipartFile image,
+                                                               @Valid @RequestBody PostReq postReq,
                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return ResponseEntity.ok(postService.updatePost(postId, postReq, image, userDetails));
+        return ResponseEntity.ok(postService.updatePost(postId, postReq, userDetails));
     }
 
     @Operation(summary = "게시글 삭제")

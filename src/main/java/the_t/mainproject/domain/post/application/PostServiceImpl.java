@@ -117,7 +117,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public SuccessResponse<Message> updatePost(Long postId, PostReq postReq, MultipartFile image,
+    public SuccessResponse<Message> updatePost(Long postId, PostReq postReq,
                                                UserDetailsImpl userDetails) {
         // post 찾기
         Post post = postRepository.findById(postId)
@@ -125,19 +125,53 @@ public class PostServiceImpl implements PostService {
         if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
         }
-        // post 제목, 내용, 음성 유형 수정
+        //** post 제목, 내용, 음성 유형 수정 **//
         post.updatePost(postReq.getTitle(), postReq.getContent(), VoiceType.valueOf(postReq.getVoice_type()));
 
-        // 썸네일 수정
-        if (!image.isEmpty()) {
-            // 기존 썸네일 삭제
-            if (post.getThumb() != null && !post.getThumb().isEmpty()) {
-                s3Service.deleteImage(post.getThumb());
-            }
-            // 새 이미지 업로드 및 업데이트
-            post.updateThumb(s3Service.uploadImage(image));
-        }
+        //** 이미지 수정 **//
+        // 기존 이미지 목록 가져오기
+        List<Image> existingImages = imageRepository.findAllByPostId(postId);
 
+        // 요청된 이미지 ID 목록과 기존 이미지 목록 비교하여 더 이상 쓰이지 않는 이미지 삭제
+        List<Long> newImageIdList = postReq.getImageIdList();
+        List<Image> imagesToDelete = new ArrayList<>();
+        for (Image existingImage : existingImages) {
+            if (!newImageIdList.contains(existingImage.getId())) {
+                imagesToDelete.add(existingImage); // 삭제할 이미지 추가
+            }
+        }
+        // 이미지 삭제
+        for (Image imageToDelete : imagesToDelete) {
+            s3Service.deleteImage(imageToDelete.getUrl());
+        }
+        imageRepository.deleteAll(imagesToDelete);
+        imageRepository.flush();
+        // 삭제 이후 남은 이미지 중에서 썸네일 이미지가 있다면 `thumb=false`로 설정
+        Image existingThumb = imageRepository.findByPostIdAndThumb(postId, true);
+        if (existingThumb != null) {
+            existingThumb.updateThumb(false);
+        }
+        // 새롭게 추가된 이미지 처리
+        List<Image> imagesToUpdate = new ArrayList<>();
+        for (Long imageId : newImageIdList) {
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
+            // image가 이미 다른 post에 등록된 경우 예외 반환
+            if (image.getPost() != null){
+                throw new BusinessException("이미 다른 게시글에 포함된 이미지입니다. 이미지id = " + imageId, ErrorCode.ALREADY_EXISTS);
+            }
+            // image - post 연결
+            image.updatePost(post);
+            // 썸네일 이미지 설정
+            if (image.getId().equals(postReq.getThumbImageId())) {
+                image.updateThumb(true);
+            }
+            imagesToUpdate.add(image); // 업데이트할 이미지 목록에 추가
+        }
+        // 이미지를 저장
+        imageRepository.saveAll(imagesToUpdate);
+
+        //** 키워드 수정 **//
         // PostKeyword 삭제
         postKeywordRepository.deleteAllByPostId(postId);
 

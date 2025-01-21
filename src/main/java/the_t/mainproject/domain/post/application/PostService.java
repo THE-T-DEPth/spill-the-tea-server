@@ -16,7 +16,7 @@ import java.util.List;
 public interface PostService {
     SuccessResponse<ImageRes> uploadImage(MultipartFile image, UserDetailsImpl userDetails);
     SuccessResponse<Message> createPost(PostReq request, UserDetailsImpl userDetails);
-    SuccessResponse<Message> updatePost(Long postId, PostReq postReq, MultipartFile image, UserDetailsImpl userDetails);
+    SuccessResponse<Message> updatePost(Long postId, PostReq postReq, UserDetailsImpl userDetails);
     SuccessResponse<Message> deletePost(Long postId, UserDetailsImpl userDetails);
     SuccessResponse<PostDetailRes> getPost(Long postId);
     SuccessResponse<LikedCountRes> likePost(Long postId, UserDetailsImpl userDetails);
