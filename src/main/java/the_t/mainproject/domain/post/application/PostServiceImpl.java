@@ -212,9 +212,13 @@ public class PostServiceImpl implements PostService {
         if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
         }
-        // 썸네일 삭제
-        if (post.getThumb() != null && !post.getThumb().isEmpty()) {
-            s3Service.deleteImage(post.getThumb());
+        // 이미지 삭제
+        List<Image> imagesToDelete = imageRepository.findAllByPostId(postId);
+        if (!imagesToDelete.isEmpty()) {
+            for (Image imageToDelete : imagesToDelete){
+                s3Service.deleteImage(imageToDelete.getUrl());
+            }
+            imageRepository.deleteAll(imagesToDelete);
         }
         // liked 삭제
         likedRepository.deleteAllByPostId(postId);
