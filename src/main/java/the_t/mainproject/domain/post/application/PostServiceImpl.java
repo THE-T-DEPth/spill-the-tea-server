@@ -39,6 +39,8 @@ import the_t.mainproject.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static the_t.mainproject.domain.post.domain.Post.getThumbImageUrl;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -250,7 +252,7 @@ public class PostServiceImpl implements PostService {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .thumb(post.getThumb())
+                .thumbUrl(getThumbImageUrl(post))
                 .likedCount(post.getLikedCount())
                 .commentCount(post.getCommentCount())
                 .voiceType(post.getVoiceType().toString())
@@ -340,7 +342,7 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
-                            .thumb(post.getThumb())
+                            .thumbUrl(getThumbImageUrl(post))
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
@@ -391,7 +393,7 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(liked.getPost().getId())
                             .title(liked.getPost().getTitle())
-                            .thumb(liked.getPost().getThumb())
+                            .thumbUrl(getThumbImageUrl(liked.getPost()))
                             .likedCount(liked.getPost().getLikedCount())
                             .commentCount(liked.getPost().getCommentCount())
                             .keywordList(keywordList.toString())
@@ -430,7 +432,7 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
-                            .thumb(post.getThumb())
+                            .thumbUrl(getThumbImageUrl(post))
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
@@ -470,7 +472,7 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
-                            .thumb(post.getThumb())
+                            .thumbUrl(getThumbImageUrl(post))
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
@@ -490,5 +492,6 @@ public class PostServiceImpl implements PostService {
 
         return SuccessResponse.of(pageResponse);
     }
+
 
 }

@@ -23,7 +23,7 @@ public class PostDetailRes {
 
     @Schema(type = "String", example = "https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws" +
             ".com/Shaun%21-431ca7d7-70ed-42c9-b5bd-af8c0db33a1d.jpg", description = "게시글 썸네일 링크")
-    public String thumb;
+    public String thumbUrl;
 
     @Schema(type = "Integer", example = "1", description = "게시글 좋아요 개수")
     public Integer likedCount;

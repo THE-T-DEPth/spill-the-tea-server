@@ -87,4 +87,16 @@ public class Post extends BaseEntity {
     public void addReportedCount() {
         this.reportedCount++;
     }
+
+    // 썸네일 이미지를 가져오는 메소드
+    public static String getThumbImageUrl(Post post) {
+        // post에 연결된 이미지 목록에서 thumb가 true인 이미지를 찾기
+        List<Image> images = post.getImages(); // Post 엔티티에서 이미지 목록 가져오기
+        for (Image image : images) {
+            if (image.isThumb()) { // thumb가 true인 이미지 찾기
+                return image.getUrl(); // 썸네일 이미지의 URL 반환
+            }
+        }
+        return images.get(0).getUrl(); // 썸네일 이미지가 없으면 첫번째 이미지 반환
+    }
 }
