@@ -47,6 +47,9 @@ public class PostDetailRes {
             ".com/Shaun%21-431ca7d7-70ed-42c9-b5bd-af8c0db33a1d.jpg", description = "작성자 프로필사진 링크")
     public String profileImage;
 
-    @Schema(type = "String", example = "2024-12-31 02:21:11.821104", description = "작성일시")
-    public String createdDateTime;
+    @Schema(type = "String", example = "24.12.31", description = "작성일")
+    public String createdDate;
+
+    @Schema(type = "String", example = "02:21", description = "작성시간")
+    public String createdTime;
 }

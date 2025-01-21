@@ -30,6 +30,9 @@ public class PostListRes {
     @Schema(type = "String", example = "[\"덕질\", \"실수\", \"고민\"]", description = "키워드 3개")
     public String keywordList;
 
-    @Schema(type = "String", example = "2024-12-31 02:21:11.821104", description = "작성일시")
-    public String createdDateTime;
+    @Schema(type = "String", example = "24.12.31", description = "작성일")
+    public String createdDate;
+
+    @Schema(type = "String", example = "02:21", description = "작성시간")
+    public String createdTime;
 }
