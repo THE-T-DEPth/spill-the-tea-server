@@ -79,15 +79,22 @@ public class PostServiceImpl implements PostService {
                         .title(postReq.getTitle())
                         .content(postReq.getContent())
                         .voiceType(VoiceType.valueOf(postReq.getVoice_type()))
-                        .member(memberRepository.findByEmail(userDetails.getUsername()).get())
+                        .member(memberRepository.findByEmail(userDetails.getUsername())
+                                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)))
                         .build();
         postRepository.save(post);
 
         // image - post 연결
         List<Image> imageList = new ArrayList<>();
         for(Long imageId : postReq.getImageIdList()){
-            Image image = imageRepository.findById(imageId).get();
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
+            // image가 이미 다른 post에 등록된 경우 예외 반환
+            if (image.getPost() != null){
+                throw new BusinessException("이미 다른 게시글에 포함된 이미지입니다. ImageId = " + imageId, ErrorCode.ALREADY_EXISTS);
+            }
             image.updatePost(post);
+            // 썸네일 설정
             if (image.getId().equals(postReq.getThumbImageId())){
                 image.updateThumb(true);
             }
@@ -97,9 +104,9 @@ public class PostServiceImpl implements PostService {
 
         // 키워드 저장
         postReq.getKeyword().forEach(keywordName -> {
-            // 기존 키워드 가져오기 또는 생성
+            // 기존 키워드 가져오기
             Keyword keyword = keywordRepository.findByName(keywordName)
-                    .orElseGet(() -> keywordRepository.save(new Keyword(keywordName)));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
 
             // PostKeyword 엔티티 생성 및 저장
             PostKeyword postKeyword = PostKeyword.builder()
