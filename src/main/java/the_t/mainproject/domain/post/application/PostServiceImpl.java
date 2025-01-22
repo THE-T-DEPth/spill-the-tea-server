@@ -33,7 +33,6 @@ import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.exception.BusinessException;
 import the_t.mainproject.global.exception.ErrorCode;
 import the_t.mainproject.global.security.UserDetailsImpl;
-import the_t.mainproject.global.service.DateTimeFormatterUtil;
 import the_t.mainproject.global.service.S3Service;
 
 import java.util.ArrayList;
@@ -260,8 +259,8 @@ public class PostServiceImpl implements PostService {
                 .memberId(post.getMember().getId())
                 .nickname(post.getMember().getNickname())
                 .profileImage(post.getMember().getProfileImage())
-                .createdDate(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[0])
-                .createdTime(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[1])
+                .createDate(post.getCreatedDate().toLocalDate())
+                .createTime(post.getCreatedDate().toLocalTime())
                 .build();
         return SuccessResponse.of(postDetailRes);
     }
@@ -346,8 +345,8 @@ public class PostServiceImpl implements PostService {
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDate(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[0])
-                            .createdTime(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[1])
+                            .createDate(post.getCreatedDate().toLocalDate())
+                            .createTime(post.getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
@@ -397,8 +396,8 @@ public class PostServiceImpl implements PostService {
                             .likedCount(liked.getPost().getLikedCount())
                             .commentCount(liked.getPost().getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDate(DateTimeFormatterUtil.formatDateTime(liked.getPost().getCreatedDate())[0])
-                            .createdTime(DateTimeFormatterUtil.formatDateTime(liked.getPost().getCreatedDate())[1])
+                            .createDate(liked.getPost().getCreatedDate().toLocalDate())
+                            .createTime(liked.getPost().getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
@@ -436,8 +435,8 @@ public class PostServiceImpl implements PostService {
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDate(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[0])
-                            .createdTime(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[1])
+                            .createDate(post.getCreatedDate().toLocalDate())
+                            .createTime(post.getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
@@ -476,8 +475,8 @@ public class PostServiceImpl implements PostService {
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDate(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[0])
-                            .createdTime(DateTimeFormatterUtil.formatDateTime(post.getCreatedDate())[1])
+                            .createDate(post.getCreatedDate().toLocalDate())
+                            .createTime(post.getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
