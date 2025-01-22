@@ -15,10 +15,13 @@ import the_t.mainproject.domain.liked.domain.Liked;
 import the_t.mainproject.domain.liked.domain.repository.LikedRepository;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.domain.post.domain.Image;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.VoiceType;
+import the_t.mainproject.domain.post.domain.repository.ImageRepository;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.domain.post.dto.req.PostReq;
+import the_t.mainproject.domain.post.dto.res.ImageRes;
 import the_t.mainproject.domain.post.dto.res.LikedCountRes;
 import the_t.mainproject.domain.post.dto.res.PostDetailRes;
 import the_t.mainproject.domain.post.dto.res.PostListRes;
@@ -35,6 +38,8 @@ import the_t.mainproject.global.service.S3Service;
 import java.util.ArrayList;
 import java.util.List;
 
+import static the_t.mainproject.domain.post.domain.Post.getThumbImageUrl;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -46,26 +51,64 @@ public class PostServiceImpl implements PostService {
     private final PostKeywordRepository postKeywordRepository;
     private final LikedRepository likedRepository;
     private final CommentRepository commentRepository;
+    private final ImageRepository imageRepository;
 
     @Override
     @Transactional
-    public SuccessResponse<Message> createPost(PostReq postReq, MultipartFile image,
+    public SuccessResponse<ImageRes> uploadImage(MultipartFile image, UserDetailsImpl userDetails) {
+        if (!memberRepository.existsById(userDetails.getMember().getId())){
+            throw new BusinessException(ErrorCode.UNAUTHORIZED_ERROR);
+        }
+
+        String imgUrl = s3Service.uploadImage(image); // 파일 업로드 후 url 반환
+        Image savedImage = imageRepository.save(Image.builder()
+                .post(null)
+                .url(imgUrl)
+                .thumb(false)
+                .build());
+        return SuccessResponse.of(ImageRes.builder()
+                        .id(savedImage.getId())
+                        .url(imgUrl)
+                        .build());
+    }
+
+    @Override
+    @Transactional
+    public SuccessResponse<Message> createPost(PostReq postReq,
                                                UserDetailsImpl userDetails) {
         // post 생성 및 저장
         Post post = Post.builder()
                         .title(postReq.getTitle())
                         .content(postReq.getContent())
-                        .thumb(s3Service.uploadImage(image))
                         .voiceType(VoiceType.valueOf(postReq.getVoice_type()))
-                        .member(memberRepository.findByEmail(userDetails.getUsername()).get())
+                        .member(memberRepository.findByEmail(userDetails.getUsername())
+                                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)))
                         .build();
         postRepository.save(post);
 
+        // image - post 연결
+        List<Image> imageList = new ArrayList<>();
+        for(Long imageId : postReq.getImageIdList()){
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
+            // image가 이미 다른 post에 등록된 경우 예외 반환
+            if (image.getPost() != null){
+                throw new BusinessException("이미 다른 게시글에 포함된 이미지입니다. ImageId = " + imageId, ErrorCode.ALREADY_EXISTS);
+            }
+            image.updatePost(post);
+            // 썸네일 설정
+            if (image.getId().equals(postReq.getThumbImageId())){
+                image.updateThumb(true);
+            }
+            imageList.add(image);
+        }
+        imageRepository.saveAll(imageList);
+
         // 키워드 저장
         postReq.getKeyword().forEach(keywordName -> {
-            // 기존 키워드 가져오기 또는 생성
+            // 기존 키워드 가져오기
             Keyword keyword = keywordRepository.findByName(keywordName)
-                    .orElseGet(() -> keywordRepository.save(new Keyword(keywordName)));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
 
             // PostKeyword 엔티티 생성 및 저장
             PostKeyword postKeyword = PostKeyword.builder()
@@ -83,7 +126,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public SuccessResponse<Message> updatePost(Long postId, PostReq postReq, MultipartFile image,
+    public SuccessResponse<Message> updatePost(Long postId, PostReq postReq,
                                                UserDetailsImpl userDetails) {
         // post 찾기
         Post post = postRepository.findById(postId)
@@ -91,19 +134,53 @@ public class PostServiceImpl implements PostService {
         if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
         }
-        // post 제목, 내용, 음성 유형 수정
+        //** post 제목, 내용, 음성 유형 수정 **//
         post.updatePost(postReq.getTitle(), postReq.getContent(), VoiceType.valueOf(postReq.getVoice_type()));
 
-        // 썸네일 수정
-        if (!image.isEmpty()) {
-            // 기존 썸네일 삭제
-            if (post.getThumb() != null && !post.getThumb().isEmpty()) {
-                s3Service.deleteImage(post.getThumb());
-            }
-            // 새 이미지 업로드 및 업데이트
-            post.updateThumb(s3Service.uploadImage(image));
-        }
+        //** 이미지 수정 **//
+        // 기존 이미지 목록 가져오기
+        List<Image> existingImages = imageRepository.findAllByPostId(postId);
 
+        // 요청된 이미지 ID 목록과 기존 이미지 목록 비교하여 더 이상 쓰이지 않는 이미지 삭제
+        List<Long> newImageIdList = postReq.getImageIdList();
+        List<Image> imagesToDelete = new ArrayList<>();
+        for (Image existingImage : existingImages) {
+            if (!newImageIdList.contains(existingImage.getId())) {
+                imagesToDelete.add(existingImage); // 삭제할 이미지 추가
+            }
+        }
+        // 이미지 삭제
+        for (Image imageToDelete : imagesToDelete) {
+            s3Service.deleteImage(imageToDelete.getUrl());
+        }
+        imageRepository.deleteAll(imagesToDelete);
+        imageRepository.flush();
+        // 삭제 이후 남은 이미지 중에서 썸네일 이미지가 있다면 `thumb=false`로 설정
+        Image existingThumb = imageRepository.findByPostIdAndThumb(postId, true);
+        if (existingThumb != null) {
+            existingThumb.updateThumb(false);
+        }
+        // 새롭게 추가된 이미지 처리
+        List<Image> imagesToUpdate = new ArrayList<>();
+        for (Long imageId : newImageIdList) {
+            Image image = imageRepository.findById(imageId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR));
+            // image가 이미 다른 post에 등록된 경우 예외 반환
+            if (image.getPost() != null){
+                throw new BusinessException("이미 다른 게시글에 포함된 이미지입니다. 이미지id = " + imageId, ErrorCode.ALREADY_EXISTS);
+            }
+            // image - post 연결
+            image.updatePost(post);
+            // 썸네일 이미지 설정
+            if (image.getId().equals(postReq.getThumbImageId())) {
+                image.updateThumb(true);
+            }
+            imagesToUpdate.add(image); // 업데이트할 이미지 목록에 추가
+        }
+        // 이미지를 저장
+        imageRepository.saveAll(imagesToUpdate);
+
+        //** 키워드 수정 **//
         // PostKeyword 삭제
         postKeywordRepository.deleteAllByPostId(postId);
 
@@ -136,9 +213,13 @@ public class PostServiceImpl implements PostService {
         if (!post.getMember().equals(memberRepository.findByEmail(userDetails.getUsername()).get())){
             throw new BusinessException(ErrorCode.FORBIDDEN_ERROR);
         }
-        // 썸네일 삭제
-        if (post.getThumb() != null && !post.getThumb().isEmpty()) {
-            s3Service.deleteImage(post.getThumb());
+        // 이미지 삭제
+        List<Image> imagesToDelete = imageRepository.findAllByPostId(postId);
+        if (!imagesToDelete.isEmpty()) {
+            for (Image imageToDelete : imagesToDelete){
+                s3Service.deleteImage(imageToDelete.getUrl());
+            }
+            imageRepository.deleteAll(imagesToDelete);
         }
         // liked 삭제
         likedRepository.deleteAllByPostId(postId);
@@ -170,13 +251,16 @@ public class PostServiceImpl implements PostService {
                 .postId(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .thumb(post.getThumb())
+                .thumbUrl(getThumbImageUrl(post))
                 .likedCount(post.getLikedCount())
                 .commentCount(post.getCommentCount())
                 .voiceType(post.getVoiceType().toString())
                 .keywordList(keywordList.toString())
                 .memberId(post.getMember().getId())
-                .createdDateTime(post.getCreatedDate().toString())
+                .nickname(post.getMember().getNickname())
+                .profileImage(post.getMember().getProfileImage())
+                .createDate(post.getCreatedDate().toLocalDate())
+                .createTime(post.getCreatedDate().toLocalTime())
                 .build();
         return SuccessResponse.of(postDetailRes);
     }
@@ -257,11 +341,12 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
-                            .thumb(post.getThumb())
+                            .thumbUrl(getThumbImageUrl(post))
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDateTime(post.getCreatedDate().toString())
+                            .createDate(post.getCreatedDate().toLocalDate())
+                            .createTime(post.getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
@@ -307,11 +392,12 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(liked.getPost().getId())
                             .title(liked.getPost().getTitle())
-                            .thumb(liked.getPost().getThumb())
+                            .thumbUrl(getThumbImageUrl(liked.getPost()))
                             .likedCount(liked.getPost().getLikedCount())
                             .commentCount(liked.getPost().getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDateTime(liked.getPost().getCreatedDate().toString()) // 공감 날짜
+                            .createDate(liked.getPost().getCreatedDate().toLocalDate())
+                            .createTime(liked.getPost().getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
@@ -345,11 +431,12 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
-                            .thumb(post.getThumb())
+                            .thumbUrl(getThumbImageUrl(post))
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDateTime(post.getCreatedDate().toString())
+                            .createDate(post.getCreatedDate().toLocalDate())
+                            .createTime(post.getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
@@ -384,11 +471,12 @@ public class PostServiceImpl implements PostService {
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
-                            .thumb(post.getThumb())
+                            .thumbUrl(getThumbImageUrl(post))
                             .likedCount(post.getLikedCount())
                             .commentCount(post.getCommentCount())
                             .keywordList(keywordList.toString())
-                            .createdDateTime(post.getCreatedDate().toString())
+                            .createDate(post.getCreatedDate().toLocalDate())
+                            .createTime(post.getCreatedDate().toLocalTime())
                             .build();
                 })
                 .toList();
@@ -403,5 +491,6 @@ public class PostServiceImpl implements PostService {
 
         return SuccessResponse.of(pageResponse);
     }
+
 
 }

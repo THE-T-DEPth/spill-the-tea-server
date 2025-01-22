@@ -16,6 +16,8 @@ import the_t.mainproject.global.exception.ErrorCode;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 @Service
@@ -24,6 +26,8 @@ import java.util.UUID;
 public class S3Service {
 	@Value("${cloud.aws.s3.bucket}")
 	private String BUCKET;
+	@Value("${cloud.aws.s3.region}")
+	private String REGION;
 
 	private final AmazonS3 amazonS3;
 
@@ -74,6 +78,13 @@ public class S3Service {
 	}
 
 	private String extractS3KeyFromUrl(String url) {
-		return url.substring(url.lastIndexOf("/") + 1);
+		try {
+			// URL에서 버킷 경로를 제거하고 S3 Key 부분만 남김
+			String keyWithEncoding = url.replace("https://" + BUCKET + ".s3." + REGION + ".amazonaws.com/", "");
+			// URL 디코딩
+			return URLDecoder.decode(keyWithEncoding, StandardCharsets.UTF_8);
+		} catch (Exception e) {
+			throw new BusinessException(ErrorCode.FILE_DELETE_FAILED);
+		}
 	}
 }

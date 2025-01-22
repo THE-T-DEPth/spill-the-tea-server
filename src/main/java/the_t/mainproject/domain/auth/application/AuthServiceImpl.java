@@ -29,6 +29,7 @@ import the_t.mainproject.domain.liked.domain.Liked;
 import the_t.mainproject.domain.liked.domain.repository.LikedRepository;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
+import the_t.mainproject.domain.post.application.PostService;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.domain.postkeyword.PostKeyword;
@@ -64,8 +65,7 @@ public class AuthServiceImpl implements AuthService {
     private final LikedRepository likedRepository;
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private final PostKeywordRepository postKeywordRepository;
-    private final S3Service s3Service;
+    private final PostService postService;
 
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -187,10 +187,7 @@ public class AuthServiceImpl implements AuthService {
         // 작성한 게시글 삭제
         List<Post> postList = postRepository.findByMember(member);
         for(Post post: postList) {
-            if(post.getThumb() != null && !post.getThumb().isEmpty()) {
-                s3Service.deleteImage(post.getThumb());
-            }
-            postKeywordRepository.deleteAllByPostId(post.getId());
+            postService.deletePost(post.getId(), userDetails);
 
             List<Comment> postCommentList = commentRepository.findByPost(post);
             for(Comment comment: postCommentList) {
@@ -201,8 +198,6 @@ public class AuthServiceImpl implements AuthService {
             }
             commentRepository.deleteAll(postCommentList);
         }
-        postRepository.deleteAll(postList);
-
         memberRepository.delete(member);
 
         Message message = Message.builder()
