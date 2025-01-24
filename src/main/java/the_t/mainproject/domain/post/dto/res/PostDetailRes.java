@@ -35,7 +35,7 @@ public class PostDetailRes {
     @Schema(type = "Integer", example = "1", description = "게시글 댓글 개수")
     public Integer commentCount;
 
-    @Schema(type = "String", example = "1", description = "게시글 음성 유형")
+    @Schema(type = "String", example = "ko_KR_Standard_A", description = "게시글 음성 유형")
     public String voiceType;
 
     @Schema(type = "String", example = "[\"덕질\", \"실수\", \"고민\"]", description = "키워드 3개")
@@ -58,5 +58,8 @@ public class PostDetailRes {
     @Schema(type = "LocalTime", example = "02:21", description = "게시글 작성시간")
     @JsonFormat(pattern = "HH:mm", shape = JsonFormat.Shape.STRING, timezone = "Asia/Seoul")
     private LocalTime createTime;
+
+    @Schema(type = "boolean", example = "true", description = "사용자가 공감을 눌렀는지 여부 (이미 눌렀으면 true, 아니면 false)")
+    private boolean isLiked;
 
 }

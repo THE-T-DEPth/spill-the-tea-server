@@ -41,4 +41,7 @@ public class PostListRes {
     @Schema(type = "LocalTime", example = "02:21", description = "게시글 작성시간")
     @JsonFormat(pattern = "HH:mm", shape = JsonFormat.Shape.STRING, timezone = "Asia/Seoul")
     private LocalTime createTime;
+
+    @Schema(type = "boolean", example = "true", description = "사용자가 공감을 눌렀는지 여부 (이미 눌렀으면 true, 아니면 false)")
+    private boolean isLiked;
 }

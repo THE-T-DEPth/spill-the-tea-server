@@ -237,7 +237,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public SuccessResponse<List<PostListRes>> getSortedPost(String sortBy) {
+    public SuccessResponse<List<PostListRes>> getSortedPost(String sortBy, Long memberId) {
         List<Post> postList;
         if (sortBy.equals("latest")) {
             postList = postRepository.findTop12ByOrderByCreatedDateDesc();
@@ -256,6 +256,7 @@ public class PostServiceImpl implements PostService {
                     List<String> keywordList = postKeywordList.stream()
                             .map(postKeyword -> postKeyword.getKeyword().getName())
                             .toList();
+                    boolean isLiked = memberId != null && likedRepository.existsByPostIdAndMemberId(post.getId(), memberId);
 
                     return PostListRes.builder()
                             .postId(post.getId())
@@ -266,6 +267,7 @@ public class PostServiceImpl implements PostService {
                             .keywordList(keywordList.toString())
                             .createDate(post.getCreatedDate().toLocalDate())
                             .createTime(post.getCreatedDate().toLocalTime())
+                            .isLiked(isLiked)
                             .build();
                 })
                 .toList();
@@ -274,7 +276,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public SuccessResponse<PostDetailRes> getPost(Long postId) {
+    public SuccessResponse<PostDetailRes> getPost(Long postId, Long memberId) {
         // post 찾기
         Post post = postRepository.findById(postId)
                 .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
@@ -285,6 +287,7 @@ public class PostServiceImpl implements PostService {
             String keyword = postKeyword.getKeyword().getName();
             keywordList.add(keyword);
         }
+        boolean isLiked = memberId != null && likedRepository.existsByPostIdAndMemberId(post.getId(), memberId);
         PostDetailRes postDetailRes = PostDetailRes.builder()
                 .postId(post.getId())
                 .title(post.getTitle())
@@ -299,6 +302,7 @@ public class PostServiceImpl implements PostService {
                 .profileImage(post.getMember().getProfileImage())
                 .createDate(post.getCreatedDate().toLocalDate())
                 .createTime(post.getCreatedDate().toLocalTime())
+                .isLiked(isLiked)
                 .build();
         return SuccessResponse.of(postDetailRes);
     }
@@ -375,7 +379,7 @@ public class PostServiceImpl implements PostService {
                     List<String> keywordList = postKeywordList.stream()
                             .map(postKeyword -> postKeyword.getKeyword().getName())
                             .toList();
-
+                    boolean isLiked = likedRepository.existsByPostIdAndMemberId(post.getId(), userDetails.getMember().getId());
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
@@ -385,6 +389,7 @@ public class PostServiceImpl implements PostService {
                             .keywordList(keywordList.toString())
                             .createDate(post.getCreatedDate().toLocalDate())
                             .createTime(post.getCreatedDate().toLocalTime())
+                            .isLiked(isLiked)
                             .build();
                 })
                 .toList();
@@ -436,6 +441,7 @@ public class PostServiceImpl implements PostService {
                             .keywordList(keywordList.toString())
                             .createDate(liked.getPost().getCreatedDate().toLocalDate())
                             .createTime(liked.getPost().getCreatedDate().toLocalTime())
+                            .isLiked(true) // 공감한 게시글을 조회하므로 항상 true
                             .build();
                 })
                 .toList();
@@ -453,7 +459,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public SuccessResponse<PageResponse<PostListRes>> getWordSearchedPost(int page, int size, String word) {
+    public SuccessResponse<PageResponse<PostListRes>> getWordSearchedPost(int page, int size, String word,
+                                                                          Long memberId) {
         Pageable pageRequest = PageRequest.of(page, size);
         Page<Post> postPage = postRepository.findByWord(word, pageRequest);
 
@@ -465,7 +472,7 @@ public class PostServiceImpl implements PostService {
                     List<String> keywordList = postKeywordList.stream()
                             .map(postKeyword -> postKeyword.getKeyword().getName())
                             .toList();
-
+                    boolean isLiked = memberId != null && likedRepository.existsByPostIdAndMemberId(post.getId(), memberId);
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
@@ -475,6 +482,7 @@ public class PostServiceImpl implements PostService {
                             .keywordList(keywordList.toString())
                             .createDate(post.getCreatedDate().toLocalDate())
                             .createTime(post.getCreatedDate().toLocalTime())
+                            .isLiked(isLiked)
                             .build();
                 })
                 .toList();
@@ -491,7 +499,8 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public SuccessResponse<PageResponse<PostListRes>> getKeywordSearchedPost(int page, int size, List<String> keywords) {
+    public SuccessResponse<PageResponse<PostListRes>> getKeywordSearchedPost(int page, int size,
+                                                                             List<String> keywords, Long memberId) {
         Pageable pageRequest = PageRequest.of(page, size);
 
         // 검색 쿼리 실행
@@ -505,7 +514,7 @@ public class PostServiceImpl implements PostService {
                     List<String> keywordList = postKeywordList.stream()
                             .map(postKeyword -> postKeyword.getKeyword().getName())
                             .toList();
-
+                    boolean isLiked = memberId != null && likedRepository.existsByPostIdAndMemberId(post.getId(), memberId);
                     return PostListRes.builder()
                             .postId(post.getId())
                             .title(post.getTitle())
@@ -515,6 +524,7 @@ public class PostServiceImpl implements PostService {
                             .keywordList(keywordList.toString())
                             .createDate(post.getCreatedDate().toLocalDate())
                             .createTime(post.getCreatedDate().toLocalTime())
+                            .isLiked(isLiked)
                             .build();
                 })
                 .toList();
