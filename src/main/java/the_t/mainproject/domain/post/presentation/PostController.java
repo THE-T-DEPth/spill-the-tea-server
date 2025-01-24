@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import the_t.mainproject.domain.image.dto.ImageRes;
 import the_t.mainproject.domain.post.application.PostService;
 import the_t.mainproject.domain.post.dto.req.PostReq;
 import the_t.mainproject.domain.post.dto.res.*;

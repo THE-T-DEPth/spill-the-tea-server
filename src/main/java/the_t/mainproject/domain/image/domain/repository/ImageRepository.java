@@ -1,7 +1,7 @@
-package the_t.mainproject.domain.post.domain.repository;
+package the_t.mainproject.domain.image.domain.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import the_t.mainproject.domain.post.domain.Image;
+import the_t.mainproject.domain.image.domain.Image;
 
 import java.util.List;
 
