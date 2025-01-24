@@ -35,6 +35,7 @@ import the_t.mainproject.global.exception.ErrorCode;
 import the_t.mainproject.global.security.UserDetailsImpl;
 import the_t.mainproject.global.service.S3Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -233,6 +234,43 @@ public class PostServiceImpl implements PostService {
         return SuccessResponse.of(Message.builder()
                 .message("게시글 삭제가 완료됨")
                 .build());
+    }
+
+    @Override
+    public SuccessResponse<List<PostListRes>> getSortedPost(String sortBy) {
+        List<Post> postList;
+        if (sortBy.equals("latest")) {
+            postList = postRepository.findTop12ByOrderByCreatedDateDesc();
+        } else if (sortBy.equals("liked")) {
+            LocalDateTime criteriaDate = LocalDateTime.now().minusDays(30);
+            postList = postRepository.findTop12ByCreatedDateAfterOrderByLikedCountDesc(criteriaDate);
+        } else {
+            throw new BusinessException("유효하지 않은 정렬 방식입니다. sortBy 값은 latest 또는 liked만 가능합니다.",
+                    ErrorCode.ILLEGAL_ARGUMENT_EXCEPTION_ERROR);
+        }
+        // DTO로 변환
+        List<PostListRes> postListRes = postList.stream()
+                .map(post -> {
+                    // 키워드 리스트 생성
+                    List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(post.getId());
+                    List<String> keywordList = postKeywordList.stream()
+                            .map(postKeyword -> postKeyword.getKeyword().getName())
+                            .toList();
+
+                    return PostListRes.builder()
+                            .postId(post.getId())
+                            .title(post.getTitle())
+                            .thumbUrl(getThumbImageUrl(post))
+                            .likedCount(post.getLikedCount())
+                            .commentCount(post.getCommentCount())
+                            .keywordList(keywordList.toString())
+                            .createDate(post.getCreatedDate().toLocalDate())
+                            .createTime(post.getCreatedDate().toLocalTime())
+                            .build();
+                })
+                .toList();
+
+        return SuccessResponse.of(postListRes);
     }
 
     @Override
