@@ -60,6 +60,15 @@ public class PostController {
         return ResponseEntity.ok(postService.deletePost(postId, userDetails));
     }
 
+    @Operation(summary = "(홈) 게시글 최신순/공감순 12개 조회")
+    @GetMapping("")
+    public ResponseEntity<SuccessResponse<List<PostListRes>>> getSortedPost(@Parameter(description = """
+            정렬 방법liked - 공감순
+            latest - 최신순
+            default는 latest입니다.""") @RequestParam(defaultValue = "latest") String sortBy) {
+        return ResponseEntity.ok(postService.getSortedPost(sortBy));
+    }
+
     @Operation(summary = "게시글 상세 조회")
     @GetMapping("/{postId}")
     public ResponseEntity<SuccessResponse<PostDetailRes>> getPost(@PathVariable Long postId) {
