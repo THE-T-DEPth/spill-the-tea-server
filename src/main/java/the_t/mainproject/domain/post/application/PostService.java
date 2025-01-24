@@ -18,6 +18,7 @@ public interface PostService {
     SuccessResponse<Message> createPost(PostReq request, UserDetailsImpl userDetails);
     SuccessResponse<Message> updatePost(Long postId, PostReq postReq, UserDetailsImpl userDetails);
     SuccessResponse<Message> deletePost(Long postId, UserDetailsImpl userDetails);
+    SuccessResponse<List<PostListRes>> getSortedPost(String sortBy);
     SuccessResponse<PostDetailRes> getPost(Long postId);
     SuccessResponse<LikedCountRes> likePost(Long postId, UserDetailsImpl userDetails);
     SuccessResponse<LikedCountRes> dislikePost(Long postId, UserDetailsImpl userDetails);

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.post.domain.Post;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
@@ -28,4 +29,9 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     ORDER BY COUNT(k.id) DESC
     """, nativeQuery = true)
     Page<Post> findByKeywords(List<String> keywords, Pageable pageable);
+
+    List<Post> findTop12ByOrderByCreatedDateDesc(); // 최신순으로 12개 조회
+
+    // 최근 30일 안에 올라온 게시글 중 공감순으로 12개 조회
+    List<Post> findTop12ByCreatedDateAfterOrderByLikedCountDesc(LocalDateTime criteriaDate);
 }
