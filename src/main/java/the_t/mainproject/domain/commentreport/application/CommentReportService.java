@@ -37,8 +37,8 @@ public class CommentReportService {
         comment.addReportedCount();
         commentReportRepository.save(commentReport);
 
-        // 일정 수 쌓였을 경우 댓글 삭제(5회 초과로 설정)
-        if(comment.getReportedCount() > 5) {
+        // 일정 수 쌓였을 경우 댓글 삭제(10회 초과로 설정)
+        if(comment.getReportedCount() > 10) {
             commentReportRepository.deleteAllByCommentId(commentId);
             commentRepository.deleteById(commentId);
         }
