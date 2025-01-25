@@ -87,4 +87,7 @@ public class Post extends BaseEntity {
         this.reportedCount++;
     }
 
+    public void subtractReportedCount() {
+        this.reportedCount--;
+    }
 }
