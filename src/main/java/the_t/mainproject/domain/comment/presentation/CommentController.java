@@ -12,6 +12,7 @@ import the_t.mainproject.domain.comment.application.CreateCommentService;
 import the_t.mainproject.domain.comment.application.CreateCommentServiceFactory;
 import the_t.mainproject.domain.comment.dto.request.CreateCommentReq;
 import the_t.mainproject.domain.comment.dto.response.CommentListRes;
+import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
@@ -38,13 +39,22 @@ public class CommentController {
 
     @Operation(summary = "댓글 목록")
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<SuccessResponse<List<CommentListRes>>> getComments(@PathVariable(value = "postId") Long postId) {
-        return ResponseEntity.ok(commentService.getCommentList(postId));
+    public ResponseEntity<SuccessResponse<List<CommentListRes>>> getComments(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                             @PathVariable(value = "postId") Long postId) {
+        Long memberId = (userDetails != null) ? userDetails.getMember().getId() : null;
+        return ResponseEntity.ok(commentService.getCommentList(postId, memberId));
     }
 
     @Operation(summary = "댓글 공감")
     @PostMapping("/liked/{commentId}")
     public ResponseEntity<SuccessResponse<Message>> likedComment(@PathVariable(value = "commentId") Long commentId) {
         return ResponseEntity.ok(commentService.likeComment(commentId));
+    }
+
+    @Operation(summary = "댓글 삭제")
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<SuccessResponse<Message>> deleteComment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                  @PathVariable(value = "commentId") Long commentId) {
+        return ResponseEntity.ok(commentService.deleteComment(userDetails.getMember().getId(), commentId));
     }
 }

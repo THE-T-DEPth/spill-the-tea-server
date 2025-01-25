@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import the_t.mainproject.domain.common.BaseEntity;
+import the_t.mainproject.domain.image.domain.Image;
 import the_t.mainproject.domain.member.domain.Member;
 
 import java.util.ArrayList;

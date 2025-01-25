@@ -7,7 +7,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.member.application.MemberServiceImpl;
-import the_t.mainproject.domain.member.dto.MemberUpdateReq;
+import the_t.mainproject.domain.member.dto.request.MemberUpdateReq;
+import the_t.mainproject.domain.member.dto.response.MemberInfoRes;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
@@ -18,6 +19,12 @@ import the_t.mainproject.global.security.UserDetailsImpl;
 public class MemberController {
 
     private final MemberServiceImpl memberService;
+
+    @Operation(summary = "내 정보 조회")
+    @GetMapping
+    public ResponseEntity<SuccessResponse<MemberInfoRes>> getMemberInfo(@AuthenticationPrincipal UserDetailsImpl member) {
+        return ResponseEntity.ok(memberService.getMyInfo(member));
+    }
 
     @Operation(summary = "프로필 이미지 수정")
     @PutMapping("/image")

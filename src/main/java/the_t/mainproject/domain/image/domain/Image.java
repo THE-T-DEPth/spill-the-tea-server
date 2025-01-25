@@ -1,4 +1,4 @@
-package the_t.mainproject.domain.post.domain;
+package the_t.mainproject.domain.image.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import the_t.mainproject.domain.common.BaseEntity;
+import the_t.mainproject.domain.post.domain.Post;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

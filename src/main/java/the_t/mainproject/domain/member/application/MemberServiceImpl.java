@@ -8,7 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
-import the_t.mainproject.domain.member.dto.MemberUpdateReq;
+import the_t.mainproject.domain.member.dto.request.MemberUpdateReq;
+import the_t.mainproject.domain.member.dto.response.MemberInfoRes;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
@@ -22,6 +23,18 @@ public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
+
+    @Override
+    public SuccessResponse<MemberInfoRes> getMyInfo(UserDetailsImpl userDetails) {
+        Member member = userDetails.getMember();
+
+        MemberInfoRes memberInfoRes = MemberInfoRes.builder()
+                .profileImage(member.getProfileImage())
+                .nickname(member.getNickname())
+                .build();
+
+        return SuccessResponse.of(memberInfoRes);
+    }
 
     @Override
     @Transactional

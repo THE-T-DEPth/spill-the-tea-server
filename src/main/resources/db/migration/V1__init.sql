@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS post (
     title           VARCHAR(255)                NULL,
     content         TEXT                        NULL,
     thumb           TEXT                        NULL,
-    liked_count     INT                         DEFAULT 0 CHECK (liked_count >= 0)
-    comment_count   INT                         DEFAULT 0 CHECK (comment_count >= 0)
-    reported_count  INT                         DEFAULT 0 CHECK (reported_count >=0)
+    liked_count     INT                         DEFAULT 0 CHECK (liked_count >= 0),
+    comment_count   INT                         DEFAULT 0 CHECK (comment_count >= 0),
+    reported_count  INT                         DEFAULT 0 CHECK (reported_count >=0),
     voice_type      ENUM ('MALE', 'FEMALE')     NULL,
     created_date    DATETIME                    NOT NULL,
     modified_date   DATETIME                    NOT NULL,
@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS comment (
     member_id          BIGINT                       NOT NULL,
     post_id            BIGINT                       NOT NULL,
     content            TEXT                         NOT NULL,
-    liked_count        INT                          DEFAULT 0 CHECK (liked_count >= 0)
-    reported_count     INT                          DEFAULT 0 CHECK (reported_count >= 0)
+    liked_count        INT                          DEFAULT 0 CHECK (liked_count >= 0),
+    reported_count     INT                          DEFAULT 0 CHECK (reported_count >= 0),
     created_date       DATETIME                     NOT NULL,
     modified_date      DATETIME                     NOT NULL,
     CONSTRAINT pk_comment PRIMARY KEY (id)

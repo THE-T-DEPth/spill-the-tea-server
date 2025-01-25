@@ -100,6 +100,10 @@ public class AuthServiceImpl implements AuthService {
         String email = loginReq.getEmail();
         String password = loginReq.getPassword();
 
+        // 로그인 시 회원 체크
+        memberRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일의 유저를 찾을 수 없습니다: " + email));
+
         // 인증
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
@@ -109,10 +113,6 @@ public class AuthServiceImpl implements AuthService {
         // Token 생성
         String accessToken = jwtTokenProvider.createAccessToken(email);
         String refreshToken = jwtTokenProvider.createRefreshToken();
-
-        // 로그인 시 회원 체크
-        memberRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일의 유저를 찾을 수 없습니다: " + email));
 
         // refreshToken 발급
         redisUtil.setDataExpire(RT_PREFIX + refreshToken, email, refreshTokenValidityInSecond);
