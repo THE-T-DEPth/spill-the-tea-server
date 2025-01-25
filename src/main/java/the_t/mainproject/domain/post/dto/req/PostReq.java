@@ -21,17 +21,13 @@ public class PostReq {
 
     @NotBlank(message = "내용을 입력해주세요")
     @Size(min = 2, max = 1500, message = "내용은 최소 2자부터 최대 1500자까지 가능합니다")
-    @Schema(type = "String", example = "내용 예시", description = "내용. 소설화 적용 시 변환된 내용으로, 미적용 시는 원본 내용으로 작성해주세요")
+    @Schema(type = "String", example = "내용 예시", description = "내용. 소설화 적용 시 변환된 내용으로, 미적용 시는 원본 내용으로 작성해주세요.\n" +
+            "content(내용)은 html코드이며 짤검색을 통해 얻은 이미지 주소도 태그로써 content에 포함되어야 합니다. ")
     private String content;
 
-    @NotNull(message = "썸네일 이미지 id을 입력해주세요")
-    @Schema(type = "Long", example = "1", description = "썸네일 이미지 ID를 전달해주세요.")
-    private Long thumbImageId;
-
-    @NotEmpty(message = "이미지 id 리스트를 입력해주세요 (썸네일 포함)")
-    @Size(min = 1, max = 15, message = "이미지는 썸네일을 포함하여 최소 1개, 최대 15개까지 가능합니다")
-    @Schema(type = "List<Long>", example = "[\"1\", \"2\", \"3\"]", description = "썸네일을 포함한 모든 이미지 id를 리스트로 전달해주세요.")
-    private List<Long> imageIdList;
+    @NotNull(message = "썸네일 이미지 URL을 입력해주세요")
+    @Schema(type = "String", example = "https://this-is-thumb.jpg", description = "썸네일 이미지 URL을 전달해주세요.")
+    private String thumbUrl;
 
     @NotEmpty(message = "키워드 3개를 입력해주세요")
     @Size(min = 3, max = 3, message = "키워드는 3개만 입력해주세요")
