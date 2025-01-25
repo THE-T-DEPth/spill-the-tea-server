@@ -136,5 +136,4 @@ public class PostController {
         Long memberId = authenticationService.getMemberIdFromAuthentication();
         return ResponseEntity.ok(postService.getKeywordSearchedPost(page, size, keywords, memberId));
     }
-    }
 }
