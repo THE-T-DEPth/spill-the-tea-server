@@ -23,8 +23,11 @@ import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.domain.block.domain.Block;
 import the_t.mainproject.domain.block.domain.repository.BlockRepository;
+import the_t.mainproject.domain.comment.application.CommentService;
 import the_t.mainproject.domain.comment.domain.Comment;
 import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
+import the_t.mainproject.domain.commentreport.domain.CommentReport;
+import the_t.mainproject.domain.commentreport.domain.repository.CommentReportRepository;
 import the_t.mainproject.domain.liked.domain.Liked;
 import the_t.mainproject.domain.liked.domain.repository.LikedRepository;
 import the_t.mainproject.domain.member.domain.Member;
@@ -34,6 +37,8 @@ import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.domain.postkeyword.PostKeyword;
 import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
+import the_t.mainproject.domain.postreport.domain.PostReport;
+import the_t.mainproject.domain.postreport.domain.repository.PostReportRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
@@ -65,7 +70,11 @@ public class AuthServiceImpl implements AuthService {
     private final LikedRepository likedRepository;
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final CommentReportRepository commentReportRepository;
+    private final PostReportRepository postReportRepository;
+
     private final PostService postService;
+    private final CommentService commentService;
 
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -162,42 +171,40 @@ public class AuthServiceImpl implements AuthService {
         blockRepository.deleteAll(blockerList);
         blockRepository.deleteAll(blockedList);
 
+        // 댓글 및 게시글 신고 내역 삭제
+        List<CommentReport> commentReportList = commentReportRepository.findAllByMember(member);
+        for(CommentReport commentReport : commentReportList) {
+            Comment comment = commentReport.getComment();
+            comment.subtractReportedCount();
+        }
+        commentReportRepository.deleteAll(commentReportList);
+
+        List<PostReport> postReportList = postReportRepository.findAllByMember(member);
+        for(PostReport postReport : postReportList) {
+            Post post = postReport.getPost();
+            post.subtractReportedCount();
+        }
+        postReportRepository.deleteAll(postReportList);
+
         // 공감한 글 삭제
         List<Liked> likedList = likedRepository.findAllByMember(member);
         for(Liked liked: likedList) {
             Post post = liked.getPost();
-            if(post.getMember().equals(member))
-                continue;
-            post.subtractLiked();
+            postService.dislikePost(post.getId(), userDetails);
         }
-        likedRepository.deleteAll(likedList);
 
         // 작성한 댓글 삭제
         List<Comment> commentList = commentRepository.findAllByMember(member);
         for(Comment comment: commentList) {
-            Post post = comment.getPost();
-            if(comment.getParentComment() == null) {
-                List<Comment> childCommentList = commentRepository.findByParentComment(comment);
-                commentRepository.deleteAll(childCommentList);
-            }
-            post.subtractCommentCount();
+            commentService.deleteComment(userDetails.getMember().getId(), comment.getId());
         }
-        commentRepository.deleteAll(commentList);
 
         // 작성한 게시글 삭제
         List<Post> postList = postRepository.findByMember(member);
         for(Post post: postList) {
             postService.deletePost(post.getId(), userDetails);
-
-            List<Comment> postCommentList = commentRepository.findByPost(post);
-            for(Comment comment: postCommentList) {
-                if(comment.getParentComment() == null) {
-                    List<Comment> childCommentList = commentRepository.findByParentComment(comment);
-                    commentRepository.deleteAll(childCommentList);
-                }
-            }
-            commentRepository.deleteAll(postCommentList);
         }
+
         memberRepository.delete(member);
 
         Message message = Message.builder()

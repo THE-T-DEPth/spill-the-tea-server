@@ -29,7 +29,7 @@ public class Post extends BaseEntity {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "thumbUrl", columnDefinition = "TEXT")
+    @Column(name = "thumb_url", columnDefinition = "TEXT")
     private String thumbUrl;
 
     @Column(name = "liked_count")
@@ -87,4 +87,7 @@ public class Post extends BaseEntity {
         this.reportedCount++;
     }
 
+    public void subtractReportedCount() {
+        this.reportedCount--;
+    }
 }

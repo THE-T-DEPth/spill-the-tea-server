@@ -66,4 +66,8 @@ public class Comment extends BaseEntity {
     public void addReportedCount() {
         this.reportedCount++;
     }
+
+    public void subtractReportedCount() {
+        this.reportedCount--;
+    }
 }
