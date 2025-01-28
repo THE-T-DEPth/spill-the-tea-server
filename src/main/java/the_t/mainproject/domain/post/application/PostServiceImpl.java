@@ -50,7 +50,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public SuccessResponse<Message> createPost(PostReq postReq,
+    public SuccessResponse<Long> createPost(PostReq postReq,
                                                UserDetailsImpl userDetails) {
         // post 생성 및 저장
         Post post = Post.builder()
@@ -77,10 +77,7 @@ public class PostServiceImpl implements PostService {
 
             postKeywordRepository.save(postKeyword);
         });
-
-        return SuccessResponse.of(Message.builder()
-                .message("게시글 등록이 완료됨")
-                .build());
+        return SuccessResponse.of(post.getId());
     }
 
     @Override

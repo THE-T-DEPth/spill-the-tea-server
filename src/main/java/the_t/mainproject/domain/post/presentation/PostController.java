@@ -30,8 +30,8 @@ public class PostController {
 
     @Operation(summary = "게시글 등록")
     @PostMapping("")
-    public ResponseEntity<SuccessResponse<Message>> createPost(@Valid @RequestBody PostReq postReq,
-                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseEntity<SuccessResponse<Long>> createPost(@Valid @RequestBody PostReq postReq,
+                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(postService.createPost(postReq, userDetails));
