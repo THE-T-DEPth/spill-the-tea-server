@@ -35,15 +35,12 @@ import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.domain.post.application.PostService;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
-import the_t.mainproject.domain.postkeyword.PostKeyword;
-import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
 import the_t.mainproject.domain.postreport.domain.PostReport;
 import the_t.mainproject.domain.postreport.domain.repository.PostReportRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
 import the_t.mainproject.global.security.jwt.JwtTokenProvider;
-import the_t.mainproject.global.service.S3Service;
 import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 import java.time.Instant;
@@ -194,7 +191,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 작성한 댓글 삭제
-        List<Comment> commentList = commentRepository.findAllByMember(member);
+        List<Comment> replyList = commentRepository.findAllByMemberAndParentCommentIsNotNull(member);
+        for(Comment reply : replyList) {
+            commentService.deleteComment(userDetails.getMember().getId(), reply.getId());
+        }
+        List<Comment> commentList = commentRepository.findAllByMemberAndParentCommentIsNull(member);
         for(Comment comment: commentList) {
             commentService.deleteComment(userDetails.getMember().getId(), comment.getId());
         }
