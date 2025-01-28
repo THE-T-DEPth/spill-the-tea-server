@@ -63,6 +63,10 @@ public class Comment extends BaseEntity {
         this.likedCount++;
     }
 
+    public void subtractLikedCount() {
+        this.likedCount--;
+    }
+
     public void addReportedCount() {
         this.reportedCount++;
     }

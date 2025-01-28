@@ -6,6 +6,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,6 +20,7 @@ import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.LogoutReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
+import the_t.mainproject.domain.auth.dto.response.JoinRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.domain.block.domain.Block;
@@ -26,6 +28,8 @@ import the_t.mainproject.domain.block.domain.repository.BlockRepository;
 import the_t.mainproject.domain.comment.application.CommentService;
 import the_t.mainproject.domain.comment.domain.Comment;
 import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
+import the_t.mainproject.domain.commentliked.domain.CommentLiked;
+import the_t.mainproject.domain.commentliked.domain.repository.CommentLikedRepository;
 import the_t.mainproject.domain.commentreport.domain.CommentReport;
 import the_t.mainproject.domain.commentreport.domain.repository.CommentReportRepository;
 import the_t.mainproject.domain.liked.domain.Liked;
@@ -35,15 +39,12 @@ import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.domain.post.application.PostService;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
-import the_t.mainproject.domain.postkeyword.PostKeyword;
-import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
 import the_t.mainproject.domain.postreport.domain.PostReport;
 import the_t.mainproject.domain.postreport.domain.repository.PostReportRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
 import the_t.mainproject.global.security.UserDetailsImpl;
 import the_t.mainproject.global.security.jwt.JwtTokenProvider;
-import the_t.mainproject.global.service.S3Service;
 import the_t.mainproject.infrastructure.redis.RedisUtil;
 
 import java.time.Instant;
@@ -72,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
     private final PostRepository postRepository;
     private final CommentReportRepository commentReportRepository;
     private final PostReportRepository postReportRepository;
+    private final CommentLikedRepository commentLikedRepository;
 
     private final PostService postService;
     private final CommentService commentService;
@@ -81,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public SuccessResponse<Message> join(JoinReq joinReq) {
+    public SuccessResponse<JoinRes> join(JoinReq joinReq) {
         String email = joinReq.getEmail();
         checkVerify(email);
         String nickname = joinReq.getNickname();
@@ -96,11 +98,11 @@ public class AuthServiceImpl implements AuthService {
         Member member = memberAuthMapper.joinToMember(joinReq);
         memberRepository.save(member);
 
-        Message message = Message.builder()
-                .message("회원가입이 완료됨")
+        JoinRes joinRes = JoinRes.builder()
+                .nickname(joinReq.getNickname())
                 .build();
 
-        return SuccessResponse.of(message);
+        return SuccessResponse.of(joinRes);
     }
 
     @Override
@@ -114,10 +116,14 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일의 유저를 찾을 수 없습니다: " + email));
 
         // 인증
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }catch (BadCredentialsException e) {
+            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+        }
 
         // Token 생성
         String accessToken = jwtTokenProvider.createAccessToken(email);
@@ -186,6 +192,13 @@ public class AuthServiceImpl implements AuthService {
         }
         postReportRepository.deleteAll(postReportList);
 
+        // 공감한 댓글 삭제
+        List<CommentLiked> commentLikedList = commentLikedRepository.findAllByMember(member);
+        for(CommentLiked commentLiked: commentLikedList) {
+            Comment comment = commentLiked.getComment();
+            commentService.dislikeComment(member.getId(), comment.getId());
+        }
+
         // 공감한 글 삭제
         List<Liked> likedList = likedRepository.findAllByMember(member);
         for(Liked liked: likedList) {
@@ -194,7 +207,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 작성한 댓글 삭제
-        List<Comment> commentList = commentRepository.findAllByMember(member);
+        List<Comment> replyList = commentRepository.findAllByMemberAndParentCommentIsNotNull(member);
+        for(Comment reply : replyList) {
+            commentService.deleteComment(userDetails.getMember().getId(), reply.getId());
+        }
+        List<Comment> commentList = commentRepository.findAllByMemberAndParentCommentIsNull(member);
         for(Comment comment: commentList) {
             commentService.deleteComment(userDetails.getMember().getId(), comment.getId());
         }

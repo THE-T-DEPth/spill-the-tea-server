@@ -13,6 +13,7 @@ import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.LogoutReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
+import the_t.mainproject.domain.auth.dto.response.JoinRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.global.common.Message;
@@ -28,7 +29,7 @@ public class AuthController {
 
     @Operation(summary = "회원가입")
     @PostMapping("/join")
-    public ResponseEntity<SuccessResponse<Message>> join(@Valid @RequestBody JoinReq joinReq) {
+    public ResponseEntity<SuccessResponse<JoinRes>> join(@Valid @RequestBody JoinReq joinReq) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(authService.join(joinReq));

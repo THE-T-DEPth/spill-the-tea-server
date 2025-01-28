@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.security.SecureRandom;
 import java.util.Collections;
@@ -24,6 +26,7 @@ public class MailUtil {
     private String fromEmail;
 
     private final JavaMailSender mailSender;
+    private final SpringTemplateEngine templateEngine;
 
     public MimeMessage createMessage(String code, String email) throws MessagingException {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -31,7 +34,7 @@ public class MailUtil {
         helper.setTo(email);
         helper.setSubject(SUBJECT);
         helper.setFrom(fromEmail);
-        helper.setText(code, true);
+        helper.setText(setContext(code), true);
 
         return mimeMessage;
     }
@@ -76,5 +79,12 @@ public class MailUtil {
         return passwordChars.stream()
                 .map(String::valueOf)
                 .collect(Collectors.joining());
+    }
+
+    // thymeleaf를 이용한 context 설정
+    public String setContext(String code) {
+        Context context = new Context();
+        context.setVariable("code", code);
+        return templateEngine.process("verification-email", context);
     }
 }

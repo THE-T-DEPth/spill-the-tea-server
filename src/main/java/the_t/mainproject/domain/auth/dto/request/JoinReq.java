@@ -17,8 +17,11 @@ public class JoinReq {
 
     @NotBlank(message = "비밀번호를 입력해주세요")
     @Size(min = 8, max = 20, message = "최소 8자 최대 20자까지 가능합니다")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-={}\\[\\]|:;\"'<>,.?/~`])[A-Za-z\\d!@#$%^&*()_+\\-={}\\[\\]|:;\"'<>,.?/~`]*$")
-    @Schema(type = "String", example = "password1!", description = "비밀번호")
+    @Pattern(
+            regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-={}\\[\\]|:;\"'<>,.?/~`])[A-Za-z\\d!@#$%^&*()_+\\-={}\\[\\]|:;\"'<>,.?/~`]*$",
+            message = "비밀번호는 8~20자 이내여야 하며, 대소문자, 숫자, 특수문자를 각각 최소 1개씩 포함해야 합니다."
+    )
+    @Schema(type = "String", example = "Password1!", description = "비밀번호")
     private String password;
 
     @NotBlank(message = "이름을 입력해주세요")

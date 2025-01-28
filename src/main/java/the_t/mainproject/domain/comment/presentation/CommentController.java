@@ -47,8 +47,16 @@ public class CommentController {
 
     @Operation(summary = "댓글 공감")
     @PostMapping("/liked/{commentId}")
-    public ResponseEntity<SuccessResponse<Message>> likedComment(@PathVariable(value = "commentId") Long commentId) {
-        return ResponseEntity.ok(commentService.likeComment(commentId));
+    public ResponseEntity<SuccessResponse<Message>> likedComment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                 @PathVariable(value = "commentId") Long commentId) {
+        return ResponseEntity.ok(commentService.likeComment(userDetails.getMember().getId(), commentId));
+    }
+
+    @Operation(summary = "댓글 공감 취소")
+    @DeleteMapping("/liked/{commentId}")
+    public ResponseEntity<SuccessResponse<Message>> dislikedComment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                    @PathVariable(value = "commentId") Long commentId) {
+        return ResponseEntity.ok(commentService.dislikeComment(userDetails.getMember().getId(), commentId));
     }
 
     @Operation(summary = "댓글 삭제")
