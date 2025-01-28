@@ -93,7 +93,9 @@ public enum ErrorCode {
 
     FILE_UPLOAD_FAILED(500, "B995", "S3 버킷에 파일(이미지) 업로드를 실패했습니다."),
 
-    FILE_DELETE_FAILED(500, "B994", "S3 버킷에 파일(이미지) 업로드를 실패했습니다.")
+    FILE_DELETE_FAILED(500, "B994", "S3 버킷에 파일(이미지) 업로드를 실패했습니다."),
+
+    GPT_REQUEST_FAILED(500, "B993", "GPT API 호출에 실패했습니다.")
     ; // End
 
     /**
