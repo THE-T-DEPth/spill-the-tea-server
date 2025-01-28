@@ -20,6 +20,7 @@ import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.LogoutReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
+import the_t.mainproject.domain.auth.dto.response.JoinRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.domain.block.domain.Block;
@@ -79,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public SuccessResponse<Message> join(JoinReq joinReq) {
+    public SuccessResponse<JoinRes> join(JoinReq joinReq) {
         String email = joinReq.getEmail();
         checkVerify(email);
         String nickname = joinReq.getNickname();
@@ -94,11 +95,11 @@ public class AuthServiceImpl implements AuthService {
         Member member = memberAuthMapper.joinToMember(joinReq);
         memberRepository.save(member);
 
-        Message message = Message.builder()
-                .message("회원가입이 완료됨")
+        JoinRes joinRes = JoinRes.builder()
+                .nickname(joinReq.getNickname())
                 .build();
 
-        return SuccessResponse.of(message);
+        return SuccessResponse.of(joinRes);
     }
 
     @Override
