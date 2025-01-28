@@ -29,6 +29,10 @@ public class CommentReportService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 댓글을 찾을 수 없습니다."));
 
+        if(commentReportRepository.existsByMemberAndCommentId(userDetails.getMember(), commentId)) {
+            throw new IllegalArgumentException("이미 신고한 댓글입니다.");
+        }
+
         CommentReport commentReport = CommentReport.builder()
                 .comment(comment)
                 .member(member)
