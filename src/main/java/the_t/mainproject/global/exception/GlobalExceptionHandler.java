@@ -43,12 +43,8 @@ public class GlobalExceptionHandler {
         BindingResult bindingResult = ex.getBindingResult();
         StringBuilder stringBuilder = new StringBuilder();
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
-            if("password".equals(fieldError.getField())){
-                stringBuilder.append("비밀번호가 일치하지 않습니다.");
-            }else {
-                stringBuilder.append(fieldError.getField()).append(":");
-                stringBuilder.append(fieldError.getDefaultMessage());
-            }
+            stringBuilder.append(fieldError.getField()).append(":");
+            stringBuilder.append(fieldError.getDefaultMessage());
             stringBuilder.append(", ");
         }
         if(stringBuilder.length() > 0) {
