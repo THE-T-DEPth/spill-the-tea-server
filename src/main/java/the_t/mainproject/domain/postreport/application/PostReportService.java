@@ -29,6 +29,10 @@ public class PostReportService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 게시글을 찾을 수 없습니다."));
 
+        if(postReportRepository.existsByMemberAndPostId(userDetails.getMember(), postId)) {
+            throw new IllegalArgumentException("이미 신고한 게시글입니다.");
+        }
+
         PostReport postReport = PostReport.builder()
                 .post(post)
                 .member(member)

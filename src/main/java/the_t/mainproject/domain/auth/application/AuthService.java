@@ -5,6 +5,7 @@ import the_t.mainproject.domain.auth.dto.request.LoginReq;
 import the_t.mainproject.domain.auth.dto.request.LogoutReq;
 import the_t.mainproject.domain.auth.dto.request.ModifyPasswordReq;
 import the_t.mainproject.domain.auth.dto.response.DuplicateCheckRes;
+import the_t.mainproject.domain.auth.dto.response.JoinRes;
 import the_t.mainproject.domain.auth.dto.response.LoginRes;
 import the_t.mainproject.domain.auth.dto.response.ReissueRes;
 import the_t.mainproject.global.common.Message;
@@ -13,7 +14,7 @@ import the_t.mainproject.global.security.UserDetailsImpl;
 
 public interface AuthService {
 
-    SuccessResponse<Message> join(JoinReq joinReq);
+    SuccessResponse<JoinRes> join(JoinReq joinReq);
 
     SuccessResponse<LoginRes> login(LoginReq loginReq);
 

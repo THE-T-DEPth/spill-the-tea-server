@@ -14,7 +14,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // 대댓글 찾기
     List<Comment> findByPostAndParentCommentIsNotNull(Post post);
 
-    List<Comment> findAllByMember(Member member);
+    List<Comment> findAllByMemberAndParentCommentIsNull(Member member);
+
+    List<Comment> findAllByMemberAndParentCommentIsNotNull(Member member);
 
     List<Comment> findByParentComment(Comment parentComment);
 

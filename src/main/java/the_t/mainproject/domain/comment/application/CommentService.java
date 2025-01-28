@@ -8,12 +8,17 @@ import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
 import the_t.mainproject.domain.comment.dto.response.CommentListRes;
 import the_t.mainproject.domain.comment.dto.response.ReplyListRes;
 import the_t.mainproject.domain.comment.exception.UnauthorizedException;
+import the_t.mainproject.domain.commentliked.domain.CommentLiked;
+import the_t.mainproject.domain.commentliked.domain.repository.CommentLikedRepository;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.domain.post.domain.Post;
 import the_t.mainproject.domain.post.domain.repository.PostRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
+import the_t.mainproject.global.exception.BusinessException;
+import the_t.mainproject.global.exception.ErrorCode;
+import the_t.mainproject.global.security.UserDetailsImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +31,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final MemberRepository memberRepository;
+    private final CommentLikedRepository commentLikedRepository;
 
     public SuccessResponse<List<CommentListRes>> getCommentList(Long postId, Long memberId) {
         Post post = postRepository.findById(postId)
@@ -92,14 +98,49 @@ public class CommentService {
     }
 
     @Transactional
-    public SuccessResponse<Message> likeComment(Long commentId) {
+    public SuccessResponse<Message> likeComment(Long memberId, Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당하는 댓글 혹은 대댓글이 없습니다. " + commentId));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버를 찾을 수 없습니다. " + memberId));
+
+        if(commentLikedRepository.existsByMemberIdAndCommentId(member.getId(), comment.getId())) {
+            throw new BusinessException(ErrorCode.ALREADY_EXISTS);
+        }
+
+        CommentLiked commentLiked = CommentLiked.builder()
+                .member(member)
+                .comment(comment)
+                .build();
+        commentLikedRepository.save(commentLiked);
 
         comment.addLikedCount();
+        commentRepository.save(comment);
 
         Message message = Message.builder()
                 .message("댓글 공감이 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
+    }
+
+    @Transactional
+    public SuccessResponse<Message> dislikeComment(Long memberId, Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 댓글 혹은 대댓글이 없습니다. " + commentId));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 멤버를 찾을 수 없습니다. " + memberId));
+
+        if(!commentLikedRepository.existsByMemberIdAndCommentId(memberId, commentId)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+
+        commentLikedRepository.deleteByMemberIdAndCommentId(member.getId(), comment.getId());
+        comment.subtractLikedCount();
+        commentRepository.save(comment);
+
+        Message message = Message.builder()
+                .message("댓글 공감 취소가 완료되었습니다.")
                 .build();
 
         return SuccessResponse.of(message);

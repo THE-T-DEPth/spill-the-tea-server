@@ -10,5 +10,7 @@ public interface CommentReportRepository extends JpaRepository<CommentReport, Lo
 
     void deleteAllByCommentId(Long commentId);
 
+    boolean existsByMemberAndCommentId(Member member, Long commentId);
+
     List<CommentReport> findAllByMember(Member member);
 }
