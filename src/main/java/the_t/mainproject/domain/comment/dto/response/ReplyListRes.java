@@ -31,11 +31,11 @@ public class ReplyListRes {
     private String content;
 
     @Schema(type = "LocalTime", example = "12:25", description = "대댓글 생성된 시간을 표시합니다.")
-    @JsonFormat(pattern = "HH:mm", shape = JsonFormat.Shape.STRING, timezone = "Asia/Seoul")
+    @JsonFormat(pattern = "HH:mm", shape = JsonFormat.Shape.STRING)
     private LocalTime createTime;
 
     @Schema(type = "LocalDate", example = "2025.01.01", description = "대댓글 생성된 날짜를 표시합니다.")
-    @JsonFormat(pattern = "yy.MM.dd", shape = JsonFormat.Shape.STRING, timezone = "Asia/Seoul")
+    @JsonFormat(pattern = "yy.MM.dd", shape = JsonFormat.Shape.STRING)
     private LocalDate createDate;
 
     @Schema(type = "Integer", example = "1", description = "대댓글 공감 수를 표시합니다.")
