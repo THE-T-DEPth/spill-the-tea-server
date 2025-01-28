@@ -28,6 +28,8 @@ import the_t.mainproject.domain.block.domain.repository.BlockRepository;
 import the_t.mainproject.domain.comment.application.CommentService;
 import the_t.mainproject.domain.comment.domain.Comment;
 import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
+import the_t.mainproject.domain.commentliked.domain.CommentLiked;
+import the_t.mainproject.domain.commentliked.domain.repository.CommentLikedRepository;
 import the_t.mainproject.domain.commentreport.domain.CommentReport;
 import the_t.mainproject.domain.commentreport.domain.repository.CommentReportRepository;
 import the_t.mainproject.domain.liked.domain.Liked;
@@ -71,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
     private final PostRepository postRepository;
     private final CommentReportRepository commentReportRepository;
     private final PostReportRepository postReportRepository;
+    private final CommentLikedRepository commentLikedRepository;
 
     private final PostService postService;
     private final CommentService commentService;
@@ -188,6 +191,13 @@ public class AuthServiceImpl implements AuthService {
             post.subtractReportedCount();
         }
         postReportRepository.deleteAll(postReportList);
+
+        // 공감한 댓글 삭제
+        List<CommentLiked> commentLikedList = commentLikedRepository.findAllByMember(member);
+        for(CommentLiked commentLiked: commentLikedList) {
+            Comment comment = commentLiked.getComment();
+            commentService.dislikeComment(member.getId(), comment.getId());
+        }
 
         // 공감한 글 삭제
         List<Liked> likedList = likedRepository.findAllByMember(member);
