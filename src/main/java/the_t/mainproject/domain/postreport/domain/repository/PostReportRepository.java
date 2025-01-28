@@ -10,5 +10,7 @@ public interface PostReportRepository extends JpaRepository<PostReport, Long> {
 
     void deleteAllByPostId(Long postId);
 
+    boolean existsByMemberAndPostId(Member member, Long postId);
+
     List<PostReport> findAllByMember(Member member);
 }
