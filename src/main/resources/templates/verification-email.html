@@ -9,15 +9,7 @@
 <table class="container" style="display: flex; justify-content: center; align-items: center; min-width: 752px;">
   <tr>
     <td class="header" style="position: relative; display: flex; height: 60px; flex-direction: row; text-align: center; justify-content: center; padding: 0 200px; background-color: #7ac87d;">
-      <img class="image1" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Union.png" style="position: absolute; left: 0;"/>
-      <img class="image2" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/BigPot.png" style="position: absolute; left: 10%;"/>
-      <img class="image3" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Union2.png" style="position: absolute; left: 30%; top: 13px;"/>
-      <img class="image4" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/BigPot2.png" style="position: absolute; left: 57%; top: 4px;"/>
-      <img class="image5" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Union3.png" style="position: absolute; left: 73%;"/>
-      <img class="image6" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/BigPot.png" style="position: absolute; left: 88%;"/>
-      <img class="tea" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Tea.png" style="height: 40px; margin-top: 8px;"/>
-      <h1 class="logo" style="margin: 0; margin-left: 20px; line-height: 1.5; color: white; font-family: Arial sans-serif; font-size: 150%; margin-top: 15px;">
-        Spill the tea : 썰푸는 장소</h1>
+      <img src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/header.png" />
     </td>
   </tr>
   <tr>
@@ -27,9 +19,8 @@
         안녕하세요, <span class="brand" style="color: #7ac87d; font-weight: bold;">스필더티</span>입니다.<br />
         인증코드를 확인해주세요.
       </p>
-      <div class="code-box" style="margin: 30px auto 0 auto; display: flex; justify-content: space-between; align-items: center; background-color: #fffbdb; border: 1px solid #676767; padding: 10px 20px; width: 380px;">
-        <p class="code" id="code" th:text="${code}" style="padding-left: 40px; margin: 0; font-size: 36px; font-weight: bold; color: black;">인증코드</p>
-        <button class="copy-btn" style="font-family: Arial sans-serif; background-color: #55533e; color: #fff; border: none; padding: 10px 15px; cursor: pointer; font-size: 14px;">복사하기</button>
+      <div class="code-box" style="margin: 30px auto 0 auto; display: flex; justify-content: space-between; align-items: center; background-color: #fffbdb; border: 1px solid #676767; padding: 10px 20px; width: 200px;">
+        <p class="code" th:text="${code}" style="padding-left: 28px; margin: 0; font-size: 36px; font-weight: bold; color: black;">인증코드</p>
       </div>
       <p class="note" style="font-family: Arial sans-serif; font-size: 12px; color: black; padding-top: 10px;">
         * 인증키를 인증창에 직접 입력하시거나 인증키를 복사 후 입력창에
