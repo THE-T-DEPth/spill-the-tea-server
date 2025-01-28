@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>이메일 주소 인증</title>
+    <link rel="stylesheet" href="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/login.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <img class="image1" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Union.png" />
+        <img class="image2" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/BigPot.png" />
+        <img class="image3" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Union2.png" />
+        <img class="image4" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/BigPot2.png" />
+        <img class="image5" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Union3.png" />
+        <img class="image6" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/BigPot.png" />
+        <div class="ddiv">
+          <img class="tea" src="https://spill-the-tea-bucket.s3.ap-northeast-2.amazonaws.com/mail/Tea.png" />
+          <h1 class="logo">Spill the tea : 썰푸는 장소</h1>
+        </div>
+      </header>
+
+      <main class="main">
+        <h2 class="title">이메일 주소 인증</h2>
+        <p class="subtitle">
+          안녕하세요, <span class="brand">스필더티</span>입니다.<br />인증코드를
+          확인해주세요.
+        </p>
+
+        <div class="code-box">
+          <p class="code" id="code" th:text="${code}">인증코드</p>
+          <button class="copy-btn" onclick="copyCode()">복사하기</button>
+        </div>
+
+        <p class="note">
+          * 인증키를 인증창에 직접 입력하시거나 인증키를 복사 후 입력창에
+          붙여넣기 해주세요.
+        </p>
+
+        <footer class="footer">
+          <p>
+            이메일 인증 절차에 따라 이메일 인증코드를 발급해드립니다.<br />인증코드는
+            이메일 발송 시점으로부터 3분 동안 유효합니다.
+          </p>
+        </footer>
+      </main>
+    </div>
+    <script>
+      function copyCode() {
+        const codeElement = document.getElementById("code");
+        const code = codeElement.textContent;
+
+        navigator.clipboard
+          .writeText(code)
+          .then(() => {
+            alert("인증코드가 복사되었습니다: " + code);
+          })
+          .catch((err) => {
+            alert("복사에 실패했습니다. 다시 시도해주세요.");
+            console.error("복사 에러:", err);
+          });
+      }
+    </script>
+  </body>
+</html>
