@@ -38,6 +38,7 @@ public class SecurityConfig {
             "/auth/**",
             "/test",
             "/post/**",
+            "/gpt/**",
             "/mails/**",
             "/members/**",
             "/comments/**",
