@@ -21,6 +21,9 @@ public class ReplyListRes {
     @Schema(type = "Boolean", example = "true", description = "본인 대댓글이면 true, 아니면 false를 반환합니다.")
     private Boolean mine;
 
+    @Schema(type = "Boolean", example = "true", description = "공감한 대댓글이면 true, 아니면 false를 반환합니다.")
+    private Boolean liked;
+
     @Schema(type = "String", example = "image.jpg", description = "프로필 이미지를 표시합니다.")
     private String profileImage;
 
