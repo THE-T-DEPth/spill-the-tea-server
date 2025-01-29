@@ -12,7 +12,7 @@ import the_t.mainproject.global.security.UserDetailsImpl;
 import java.util.List;
 
 public interface PostService {
-    SuccessResponse<Message> createPost(PostReq request, UserDetailsImpl userDetails);
+    SuccessResponse<Long> createPost(PostReq request, UserDetailsImpl userDetails);
     SuccessResponse<Message> updatePost(Long postId, PostReq postReq, UserDetailsImpl userDetails);
     SuccessResponse<Message> deletePost(Long postId, UserDetailsImpl userDetails);
     SuccessResponse<List<PostListRes>> getSortedPost(String sortBy, Long memberId);
