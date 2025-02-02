@@ -3,6 +3,7 @@ package the_t.mainproject.domain.postreport.application;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import the_t.mainproject.domain.comment.domain.Comment;
 import the_t.mainproject.domain.member.domain.Member;
 import the_t.mainproject.domain.member.domain.repository.MemberRepository;
 import the_t.mainproject.domain.post.domain.Post;
@@ -49,6 +50,18 @@ public class PostReportService {
 
         Message message = Message.builder()
                 .message("게시글 신고가 완료되었습니다.")
+                .build();
+
+        return SuccessResponse.of(message);
+    }
+
+    public SuccessResponse<Message> checkReportedPost(UserDetailsImpl userDetails, Long postId) {
+        if(postReportRepository.existsByMemberAndPostId(userDetails.getMember(), postId)) {
+            throw new IllegalArgumentException("이미 신고한 게시글입니다.");
+        }
+
+        Message message = Message.builder()
+                .message("게시글 신고가 가능합니다.")
                 .build();
 
         return SuccessResponse.of(message);
