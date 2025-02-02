@@ -8,6 +8,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import the_t.mainproject.domain.block.domain.Block;
+import the_t.mainproject.domain.block.domain.repository.BlockRepository;
 import the_t.mainproject.domain.comment.domain.repository.CommentRepository;
 import the_t.mainproject.domain.keyword.domain.Keyword;
 import the_t.mainproject.domain.keyword.domain.repository.KeywordRepository;
@@ -24,6 +26,8 @@ import the_t.mainproject.domain.post.dto.res.PostDetailRes;
 import the_t.mainproject.domain.post.dto.res.PostListRes;
 import the_t.mainproject.domain.postkeyword.PostKeyword;
 import the_t.mainproject.domain.postkeyword.repository.PostKeywordRepository;
+import the_t.mainproject.domain.postreport.domain.PostReport;
+import the_t.mainproject.domain.postreport.domain.repository.PostReportRepository;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.PageResponse;
 import the_t.mainproject.global.common.SuccessResponse;
@@ -34,7 +38,9 @@ import the_t.mainproject.global.service.S3Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -47,6 +53,8 @@ public class PostServiceImpl implements PostService {
     private final PostKeywordRepository postKeywordRepository;
     private final LikedRepository likedRepository;
     private final CommentRepository commentRepository;
+    private final BlockRepository blockRepository;
+    private final PostReportRepository postReportRepository;
 
     @Override
     @Transactional
@@ -144,15 +152,17 @@ public class PostServiceImpl implements PostService {
     @Override
     public SuccessResponse<List<PostListRes>> getSortedPost(String sortBy, Long memberId) {
         List<Post> postList;
+
         if (sortBy.equals("latest")) {
-            postList = postRepository.findTop12ByOrderByCreatedDateDesc();
+            postList = postRepository.findTop12ByOrderByCreatedDateDesc(memberId);
         } else if (sortBy.equals("liked")) {
             LocalDateTime criteriaDate = LocalDateTime.now().minusDays(30);
-            postList = postRepository.findTop12ByCreatedDateAfterOrderByLikedCountDesc(criteriaDate);
+            postList = postRepository.findTop12ByCreatedDateAfterOrderByLikedCountDesc(criteriaDate, memberId);
         } else {
             throw new BusinessException("유효하지 않은 정렬 방식입니다. sortBy 값은 latest 또는 liked만 가능합니다.",
                     ErrorCode.ILLEGAL_ARGUMENT_EXCEPTION_ERROR);
         }
+
         // DTO로 변환
         List<PostListRes> postListRes = postList.stream()
                 .map(post -> {
@@ -185,7 +195,7 @@ public class PostServiceImpl implements PostService {
         // post 찾기
         Post post = postRepository.findById(postId)
                 .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
-        //keyword 찾기
+        // keyword 찾기
         List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(postId);
         List<String> keywordList = new ArrayList<>(3);
         for (PostKeyword postKeyword : postKeywordList) {
@@ -263,7 +273,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public SuccessResponse<PageResponse<PostListRes>> getMyPost(int page, int size, String sortBy,
                                                                 UserDetailsImpl userDetails) {
-        //dafault 설정(DATE_DESC)으로 초기화
+        // default 설정(DATE_DESC)으로 초기화
         Pageable pageRequest = PageRequest.of(page, size, Sort.by(Sort.Order.desc("createdDate")));
         switch (sortBy) {
             // default : DATE_DESC 최근 ~> 과거순
@@ -367,7 +377,7 @@ public class PostServiceImpl implements PostService {
     public SuccessResponse<PageResponse<PostListRes>> getWordSearchedPost(int page, int size, String word,
                                                                           Long memberId) {
         Pageable pageRequest = PageRequest.of(page, size);
-        Page<Post> postPage = postRepository.findByWord(word, pageRequest);
+        Page<Post> postPage = postRepository.findByWord(word, pageRequest, memberId);
 
         // DTO로 변환
         List<PostListRes> postListRes = postPage.stream()
@@ -409,7 +419,7 @@ public class PostServiceImpl implements PostService {
         Pageable pageRequest = PageRequest.of(page, size);
 
         // 검색 쿼리 실행
-        Page<Post> postPage = postRepository.findByKeywords(keywords, pageRequest);
+        Page<Post> postPage = postRepository.findByKeywords(keywords, pageRequest, memberId);
 
         // DTO로 변환
         List<PostListRes> postListRes = postPage.stream()
