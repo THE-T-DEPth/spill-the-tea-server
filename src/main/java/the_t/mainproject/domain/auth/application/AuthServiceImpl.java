@@ -182,15 +182,17 @@ public class AuthServiceImpl implements AuthService {
         for(CommentReport commentReport : commentReportList) {
             Comment comment = commentReport.getComment();
             comment.subtractReportedCount();
+            commentRepository.save(comment);
+            commentReportRepository.delete(commentReport);
         }
-        commentReportRepository.deleteAll(commentReportList);
 
         List<PostReport> postReportList = postReportRepository.findAllByMember(member);
         for(PostReport postReport : postReportList) {
             Post post = postReport.getPost();
             post.subtractReportedCount();
+            postRepository.save(post);
+            postReportRepository.delete(postReport);
         }
-        postReportRepository.deleteAll(postReportList);
 
         // 공감한 댓글 삭제
         List<CommentLiked> commentLikedList = commentLikedRepository.findAllByMember(member);
