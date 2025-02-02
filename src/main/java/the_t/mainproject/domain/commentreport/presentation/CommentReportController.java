@@ -1,13 +1,11 @@
 package the_t.mainproject.domain.commentreport.presentation;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import the_t.mainproject.domain.commentreport.application.CommentReportService;
 import the_t.mainproject.global.common.Message;
 import the_t.mainproject.global.common.SuccessResponse;
@@ -25,5 +23,13 @@ public class CommentReportController {
     public ResponseEntity<SuccessResponse<Message>> reportComment(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                   @PathVariable Long commentId) {
         return ResponseEntity.ok(commentReportService.reportComment(userDetails, commentId));
+    }
+
+    @Operation(summary = "댓글 신고 여부 확인")
+    @GetMapping(value = "/check")
+    public ResponseEntity<SuccessResponse<Message>> checkReported(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Parameter(description = "댓글의 아이디 번호") @RequestParam Long commentId) {
+        return ResponseEntity.ok(commentReportService.checkReportedComment(userDetails, commentId));
     }
 }

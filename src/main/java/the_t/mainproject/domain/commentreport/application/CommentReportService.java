@@ -53,4 +53,16 @@ public class CommentReportService {
 
         return SuccessResponse.of(message);
     }
+
+    public SuccessResponse<Message> checkReportedComment(UserDetailsImpl userDetails, Long commentId) {
+        if(commentReportRepository.existsByMemberAndCommentId(userDetails.getMember(), commentId)) {
+            throw new IllegalArgumentException("이미 신고한 댓글입니다.");
+        }
+
+        Message message = Message.builder()
+                .message("댓글 신고가 가능합니다.")
+                .build();
+
+        return SuccessResponse.of(message);
+    }
 }
