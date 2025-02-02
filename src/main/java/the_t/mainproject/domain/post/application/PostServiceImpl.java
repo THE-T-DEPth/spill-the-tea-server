@@ -195,6 +195,9 @@ public class PostServiceImpl implements PostService {
         // post 찾기
         Post post = postRepository.findById(postId)
                 .orElseThrow((() -> new BusinessException(ErrorCode.NOT_FOUND_ERROR)));
+        if(memberId != null && blockRepository.existsByBlockerIdAndBlocked(memberId, post.getMember())) {
+            throw new IllegalArgumentException("차단한 사용자의 게시글입니다.");
+        }
         // keyword 찾기
         List<PostKeyword> postKeywordList = postKeywordRepository.findAllByPostId(postId);
         List<String> keywordList = new ArrayList<>(3);
