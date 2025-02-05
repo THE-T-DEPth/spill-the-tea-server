@@ -42,8 +42,8 @@ public class PostReportService {
         post.addReportedCount();
         postReportRepository.save(postReport);
 
-        // 일정 수 쌓였을 경우 댓글 삭제(10회 초과로 설정)
-        if(post.getReportedCount() > 10) {
+        // 일정 수 쌓였을 경우 댓글 삭제(10회 설정)
+        if(post.getReportedCount() > 9) {
             postReportRepository.deleteAllByPostId(postId);
             postRepository.deleteById(postId);
         }
