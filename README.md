@@ -13,14 +13,19 @@ Spill the tea는 짤 기능, 소설화 기능, 음성 출력 기능 등을 이�
 <br>
 
 ## 💻 주요 기능
+<img width="3840" height="2160" alt="주요기능1_게시" src="https://github.com/user-attachments/assets/cac7dcc4-3864-4f24-bc85-92c6b0a43f42" />
+<img width="3840" height="2160" alt="주요기능2_열람,나레이션" src="https://github.com/user-attachments/assets/30c40e77-f4f5-4b95-841c-aa61ddbc9d72" />
+<img width="3840" height="2160" alt="주요기능3_소통" src="https://github.com/user-attachments/assets/02d6a01d-0c9a-4ca5-a4ba-508cecf4c5e3" />
 
 <br>
 
 ## 시스템 아키텍처
+<img width="3840" height="2160" alt="spill_백엔드_기술아키텍쳐" src="https://github.com/user-attachments/assets/ebddde8e-41a0-4384-920a-36781a059902" />
 
 <br>
 
 ## ERD
+<img width="1302" height="705" alt="erd" src="https://github.com/user-attachments/assets/91674c4d-d915-46dc-8f2d-3e3ce3a26bd8" />
 
 <br>
 
